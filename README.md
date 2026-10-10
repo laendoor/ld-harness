@@ -36,13 +36,16 @@ circuito donde corren.
 ```txt
 ld-harness/
 ├── commands/               ← entry points /ld-* (visibles en autocompletado)
-│   ├── ld-discuss-task.md
-│   ├── ld-implement-task.md
-│   └── ld-sync.md
+│   ├── ld-adr.md / ld-create-pr.md / ld-create-ticket.md
+│   ├── ld-discuss-task.md / ld-implement-task.md
+│   ├── ld-improve-harness.md / ld-sync.md
+│   └── ld-review-fix.md / ld-self-review.md / ld-start-ticket.md / ld-whats-next.md
 ├── skills/                 ← contratos completos (el agente los carga on-demand)
-│   ├── ld-mem/             ← handoff pre-/clear
+│   ├── ld-adr/ / ld-improve-harness/ / ld-mem/
 │   ├── ld-workflow/        ← contrato discuss → implement (fases, gates, cierre, SHIP)
-│   └── ld-sync/            ← política de sync del propio harness (notify-only)
+│   ├── ld-sync/            ← política de sync del propio harness (notify-only)
+│   └── ld-create-pr/ ld-create-ticket/ ld-review-fix/
+│       ld-self-review/ ld-start-ticket/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)
 │   └── ld-gate/            ← enforcement determinístico (deny, no "tratar de")
@@ -63,6 +66,20 @@ Regla: **todo lo invocable por mí es command; todo lo invocable por el agente
 es skill**. Cada feature tiene ambos: el command adelgaza, el skill engorda.
 En Claude Code los skills sí se pueden invocar con `/`, pero el diseño se
 mantiene igual para que funcione en ambos motores.
+
+## Flujo diario
+
+1. **Abrir.** `/ld-sync` si dudás del harness; si no, directo a trabajar.
+   El agente consulta Engram solo (no arranca de cero).
+2. **Discutir.** `/ld-discuss-task <tarea>` (o el adapter del proyecto, ej.
+   `/aika-start-ticket 38`). Ajustás numerado, das el OK.
+3. **Ejecutar.** `/ld-implement-task`. El agente frena en gates sensibles y al
+   fin de bloque; vos hacés revisiones largas (diff + decisiones).
+4. **Cerrar.** Cierre proporcional (TEST/DOC/REVIEW) + SHIP propuesto,
+   confirmado y ejecutado. Nada está listo sin tu venia.
+5. **Handoff.** `/ld-mem` (o `fini-mem` / `aika-mem`) antes del `/clear`.
+6. **Mejorar.** Si algo del harness picó: `/ld-improve-harness <idea>` desde
+   donde estés.
 
 ## Instalación en PC o ambiente nuevo
 

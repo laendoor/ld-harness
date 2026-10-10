@@ -1,14 +1,12 @@
 ---
-name: create-pr
-description: Create a GitHub pull request with a standard template — infers title, body and linked issue from branch and commits. Shows preview before creating.
-allowed-tools: Bash
+description: Crear un GitHub pull request con formato consistente — infiere título, body e issue del branch y los commits. Muestra preview antes de crear.
 ---
 
 # Create PR
 
 Creá un GitHub pull request con formato consistente. Muestra un preview completo para confirmar antes de crear.
 
-**Announce at start:** "Usando create-pr — armando el preview del PR."
+**Announce at start:** "Usando ld-create-pr — armando el preview del PR."
 
 ---
 
@@ -169,7 +167,7 @@ Capturar la URL del PR creado.
 PR creado: #{número} — {título}
 {url}
 
-Próximo paso: cuando el CI esté verde, corré /self-review para una segunda revisión antes de mergear.
+Próximo paso: cuando el CI esté verde, corré /ld-self-review para una segunda revisión antes de mergear.
 ```
 
 ---

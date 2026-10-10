@@ -51,3 +51,10 @@ if [ -n "$PROFILE" ]; then
 fi
 
 echo "OK. Verificá con: ls -la ~/.config/opencode/skills/ ~/.claude/skills/ y /ld en opencode."
+
+echo "5/5 purga de symlinks colgados (renombres viejos)"
+for d in "$HOME/.config/opencode/commands" "$HOME/.config/opencode/skills" \
+	"$HOME/.config/opencode/plugins" "$HOME/.claude/skills"; do
+	[ -d "$d" ] || continue
+	find "$d" -maxdepth 1 -type l ! -exec test -e {} \; -print -delete 2>/dev/null || true
+done

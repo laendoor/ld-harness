@@ -76,7 +76,7 @@ Slots (todos propuestos, confirmados, ejecutados — en ese orden):
 
 1. **TEST** — tests del área afectada.
 2. **DOC** — registros tocados (bitácora, STATUS, ADR según el proyecto).
-3. **REVIEW** — self-review externo (dos lentes: correctness+seguridad y
+3. **REVIEW** — ld-self-review externo (dos lentes: correctness+seguridad y
    over-engineering), fix de findings antes de cualquier PR.
 4. **SHIP** — lo que "manda" en ese proyecto: PR, update de ticket, mensaje a
    un canal, registro de cambio. Lo concreto lo define el adapter del proyecto;

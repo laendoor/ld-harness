@@ -27,6 +27,9 @@ circuito donde corren.
    consulta al abrir y guarda al cerrar. Yo no soy el disco rígido.
 9. **Generales acá, puntuales en cada proyecto.** `ld-*` es universal;
    `fini-*`, `aika-*` y demás son adapters finos que aportan contexto y delegan.
+10. **Todo lo mío lleva prefijo `ld-`.** Es la marca de ownership: lo que
+    empieza con `ld-` vive en este repo y lo mantengo yo. Lo de terceros no se
+    vendorea (ver Externos).
 
 ## Layout
 
@@ -90,6 +93,21 @@ Engram no es opcional: es el subsistema de memoria del harness.
 Si el ambiente no tiene el MCP `engram` configurado, el paso 5 de instalación
 lo cubre: agregar el server al `opencode.jsonc` global o al `mcp_servers` de
 Claude Code según el motor.
+
+## Externos recomendados (no vendoreados)
+
+El harness los usa pero no los contiene. Se instalan aparte:
+
+- **engram** — memoria persistente entre sesiones (subsistema de memoria del
+  harness, ver arriba). Binario local + MCP (`engram mcp --tools=agent`).
+- **humanizer** — saca marcas de escritura-AI de textos.
+  <https://github.com/blader/humanizer>
+  (`git clone ... ~/.claude/skills/humanizer`)
+- **ponytail** — plugin de simplicidad radical (stdlib primero, diff mínimo).
+  <https://github.com/DietrichGebert/ponytail>
+  (en opencode: `"plugin": ["@dietrichgebert/ponytail"]`)
+- **find-skills** — descubre skills instalables (registry en <https://skills.sh/>).
+- **skill-creator** — crea y evalúa skills nuevos.
 
 ## Perfiles (personal / estudio / trabajo)
 

@@ -1,5 +1,5 @@
 ---
-name: create-ticket
+name: ld-create-ticket
 description: Create a GitHub issue interactively — infers title, labels, story points and milestone from context, shows a preview for confirmation before creating.
 allowed-tools: Bash
 ---
@@ -8,7 +8,7 @@ allowed-tools: Bash
 
 Creá un GitHub issue con formato consistente. Muestra un preview completo para confirmar antes de crear.
 
-**Announce at start:** "Usando create-ticket — armando el preview del issue."
+**Announce at start:** "Usando ld-create-ticket — armando el preview del issue."
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: review-fix
+name: ld-review-fix
 description: Read review comments on the current PR and propose fixes for each. Run after receiving code review feedback — reads inline comments, proposes concrete fixes, applies approved ones, and pushes.
 allowed-tools: Bash, Read, Glob, Edit
 ---

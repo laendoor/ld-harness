@@ -1,5 +1,7 @@
 ---
-description: Code review externo sobre el PR activo — dos agentes paralelos (correctness + over-engineering), triage, inline comments en GitHub
+name: ld-self-review
+description: Run an external code review on the current PR. Uses two parallel isolated agents (correctness + ponytail over-engineering lens). Presents findings in triage, lets the user validate each one, then posts validated findings as inline PR review comments.
+allowed-tools: Bash, Agent
 ---
 
 # Self Review
@@ -34,7 +36,7 @@ Guardá: número de PR, título, diff completo, HEAD SHA, lista de archivos modi
 
 ### 2. Leer convenciones del proyecto
 
-Leé el archivo de convenciones disponible en el proyecto: `AGENTS.md`, `CLAUDE.md`, `docs/CODE_CONVENTIONS.md`, o el equivalente. Extraé: stack, convenciones de código, criterios de calidad específicos.
+Leé el `CLAUDE.md` del proyecto actual para extraer: stack, convenciones de código, criterios de calidad específicos.
 
 ### 2b. Obtener historial git de los archivos modificados
 
@@ -44,11 +46,11 @@ Para cada archivo modificado (máximo 5 más relevantes):
 git log --oneline -10 -- {archivo}
 ```
 
-Este historial va al Agente A para detectar bugs por contexto histórico.
+Este historial va al Agente A para detectar bugs por contexto histórico (ej: revertes, fixes recurrentes, patrones conocidos de la codebase).
 
 ### 3. Lanzar dos agentes de review en paralelo — OBLIGATORIO
 
-**IMPORTANTE:** Lanzá ambos agentes **en el mismo mensaje** usando el `task` tool con `subagent_type: general` en dos llamadas paralelas. No hagas el review vos mismo — el aislamiento garantiza independencia. Si no usás el task tool, el skill no sirve.
+**IMPORTANTE:** Lanzá ambos agentes **en el mismo mensaje**, como llamadas paralelas al `Agent` tool (`subagent_type: general-purpose`). No hagas el review vos mismo — el aislamiento garantiza independencia. Si no usás el Agent tool, el skill no sirve.
 
 Construí ambos prompts reemplazando todos los placeholders con los valores reales. Cada prompt debe ser completamente autocontenido.
 
@@ -64,7 +66,7 @@ Sos un code reviewer senior haciendo un review independiente.
 No tenés historial de la conversación. Solo ves el diff y el contexto del proyecto.
 
 **Stack y convenciones del proyecto:**
-{contenido relevante de AGENTS.md / CODE_CONVENTIONS.md — stack, linting, testing, convenciones}
+{contenido relevante del CLAUDE.md — stack, linting, testing, convenciones}
 
 **Historial reciente de archivos modificados:**
 {output de git log --oneline -10 por archivo}
@@ -204,7 +206,7 @@ Si hay críticos, además de los inline comments agregá un `--request-changes`:
 gh pr review {number} --request-changes --body "$(cat .tmp/review-pr-{number}.md)"
 ```
 
-No borres `.tmp/review-pr-{number}.md` — queda como registro.
+No borres `.tmp/review-pr-{number}.md` — queda como registro y es liviano.
 
 ### 6. Reportar resumen final
 
@@ -216,11 +218,13 @@ Review completado:
   🔧 Ponytail (over-engineering): N
 
 PR: {url}
+
+Para aplicar los fixes: /ld-review-fix
 ```
 
 ## Rules
 
-- **Siempre usar el task tool** — nunca hacer el review en el contexto actual. Sin task tool, no hay
+- **Siempre usar el Agent tool** — nunca hacer el review en el contexto actual. Sin Agent tool, no hay
   context fork y el review pierde independencia.
 - **Lanzar Agente A y Agente B en el mismo mensaje** — paralelo real, no secuencial.
 - El prompt de cada agente debe ser autocontenido: diff + contexto + criterios. Sin referencias a la sesión.

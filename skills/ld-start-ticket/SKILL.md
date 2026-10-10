@@ -1,5 +1,5 @@
 ---
-name: start-ticket
+name: ld-start-ticket
 description: Use when starting work on a GitHub issue or ticket — creates the branch, enters plan mode, and structures the implementation plan with Greek phases and mandatory confirm+commit steps per phase
 ---
 
@@ -9,7 +9,7 @@ description: Use when starting work on a GitHub issue or ticket — creates the 
 
 Standard workflow for beginning work on any GitHub issue. Four steps: fetch issue → create branch → enter plan mode → write structured plan.
 
-**Announce at start:** "Usando start-ticket — creando branch y armando el plan."
+**Announce at start:** "Usando ld-start-ticket — creando branch y armando el plan."
 
 ---
 
@@ -135,12 +135,12 @@ Once all phases are committed, close the loop with this sequence. Present it as 
 git push -u origin {branch-name}
 
 # 2 — Create the PR  (run after push)
-/create-pr
+/ld-create-pr
 
 # 3 — Self-review  (run after PR is open)
-/self-review
+/ld-self-review
 ```
 
 Announce it as:
 
-> "Todas las fases commiteadas. Para cerrar el ticket: `git push`, luego `/create-pr`, luego `/self-review`."
+> "Todas las fases commiteadas. Para cerrar el ticket: `git push`, luego `/ld-create-pr`, luego `/ld-self-review`."

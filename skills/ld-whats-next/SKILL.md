@@ -1,6 +1,6 @@
 ---
-name: whats-next
-description: Use when the user wants to see what GitHub issues are available to pick up. Shows issues assigned to @me and unassigned. Triggered by /whats-next or "qué hay para hacer".
+name: ld-whats-next
+description: Use when the user wants to see what GitHub issues are available to pick up. Shows issues assigned to @me and unassigned. Triggered by /ld-whats-next or "qué hay para hacer".
 ---
 
 # What's Next
@@ -42,13 +42,13 @@ Issues disponibles:
 
 Sugerencia: #38 — prerequisito del resto de Fase 1.
 
-Para arrancar: /start-ticket 38
+Para arrancar: /ld-start-ticket 38
 ```
 
 ### 6. Terminar con
 
 ```txt
-Para arrancar: /start-ticket <número>
+Para arrancar: /ld-start-ticket <número>
 ```
 
 ## Rules

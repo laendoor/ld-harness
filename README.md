@@ -103,3 +103,17 @@ Los comandos puntuales (`fini-*`, `aika-*`, ...) NO se absorben: se adelgazan.
 Cada uno aporta su contexto puntual y delega al general (`ld-discuss-task` /
 `ld-implement-task` / `ld-sync`). La migración es posterior a estabilizar los
 generales.
+
+## Pendientes
+
+- [ ] **PC del trabajo (lunes):** clonar `ld-harness` en `~/dev/` (o mover el
+      checkout viejo de `claude-kit`) y correr `bash ~/dev/ld-harness/setup.sh`.
+      El remote ya se llama `ld-harness`: si el clone es viejo, actualizar remote
+      (`git remote set-url origin git@github.com:laendoor/ld-harness.git`).
+- [ ] **PC del trabajo (lunes):** en Claude Code, `/plugin marketplace add
+laendoor/ld-harness` + `/plugin install ld-prosa@ld-harness` (el marketplace
+      `claude-kit` quedó obsoleto; revisar si el plugin viejo sigue instalado y
+      removerlo).
+- [ ] Verificar que `/ld` autocompleta los 3 comandos en opencode.
+- [ ] Migrar `create-pr` / `create-ticket` / `self-review` globales al harness.
+- [ ] Adelgazar `fini-*` / `aika-*` a adapters que delegan a los generales.

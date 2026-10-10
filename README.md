@@ -115,5 +115,5 @@ laendoor/ld-harness` + `/plugin install ld-prosa@ld-harness` (el marketplace
       `claude-kit` quedó obsoleto; revisar si el plugin viejo sigue instalado y
       removerlo).
 - [ ] Verificar que `/ld` autocompleta los 3 comandos en opencode.
-- [ ] Migrar `create-pr` / `create-ticket` / `self-review` globales al harness.
+- [x] Migrar `create-pr` / `create-ticket` / `self-review` globales al harness.
 - [ ] Adelgazar `fini-*` / `aika-*` a adapters que delegan a los generales.

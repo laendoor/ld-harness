@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "claude-kit",
-  "description": "Leandro's personal Claude Code skills and plugins.",
+  "name": "ld-harness",
+  "description": "Leandro's personal agent harness: workflow, gates and skills for OpenCode + Claude Code.",
   "owner": {
     "name": "Leandro",
     "url": "https://github.com/laendoor"

@@ -75,8 +75,9 @@ mantiene igual para que funcione en ambos motores.
    `/aika-start-ticket 38`). Ajustás numerado, das el OK.
 3. **Ejecutar.** `/ld-implement-task`. El agente frena en gates sensibles y al
    fin de bloque; vos hacés revisiones largas (diff + decisiones).
-4. **Cerrar.** Cierre proporcional (TEST/DOC/REVIEW) + SHIP propuesto,
-   confirmado y ejecutado. Nada está listo sin tu venia.
+4. **Cerrar.** `/ld-close-task` una vez mergeado el PR: cierre proporcional
+   (TEST/DOC/REVIEW) + SHIP propuesto, confirmado y ejecutado. Nada está
+   listo sin tu venia.
 5. **Handoff.** `/ld-mem` (o `fini-mem` / `aika-mem`) antes del `/clear`.
 6. **Mejorar.** Si algo del harness picó: `/ld-improve-harness <idea>` desde
    donde estés.

@@ -65,6 +65,9 @@ Reglas:
 2. Ejecutar fases en orden. Al terminar una fase `sensible: sí`: frenar, mostrar
    diff/decisiones y pedir confirmación. Fases normales: loguear y seguir.
 3. Al terminar las fases: frenar siempre (revisión de bloque) antes del cierre.
+   El cierre puede ejecutarse ahí o diferirse a `/ld-close-task` (ej. cuando el
+   merge o la verificación posterior los hace el usuario). Sin plan aprobado,
+   ninguno de los dos ejecuta.
 4. Cierre según grosor aprobado. Si la realidad contradice el grosor (la tarea
    "trivial" tocó auth), decirlo y re-proponer grosor antes de seguir.
 5. SHIP: proponer checklist → confirmar → ejecutar. Nunca shippear de oficio.
@@ -98,3 +101,18 @@ discuss — para eso existe.
 Los comandos puntuales (`fini-*`, `aika-*`, ...) aportan contexto y delegan acá.
 El adapter define: qué es SHIP en ese proyecto, dónde vive el plan, qué
 convenciones lee el REVIEW. El harness nunca inventa el canal de ship.
+
+## 5. Close separado — `ld-close-task`
+
+Se invoca una vez mergeado el PR, cuando el cierre no ocurrió dentro del
+implement (merge o verificación posterior del lado del usuario).
+
+1. **Sin plan aprobado no hay cierre.** Misma regla y mismo mensaje que
+   implement. Sin excepciones.
+2. Ejecutar el cierre según el grosor aprobado (§3): TEST del área si quedó
+   pendiente, DOC tocada, REVIEW si aplica. Lo puntual (bitácora, STATUS,
+   limpieza de ramas, tickets) lo define el adapter del proyecto.
+3. SHIP: proponer checklist → confirmar → ejecutar. Nunca de oficio.
+4. Cerrar memoria con `mem_session_summary`. Sin esto, la próxima sesión
+   arranca ciega.
+5. Validación final: nada está "listo" sin venia explícita.

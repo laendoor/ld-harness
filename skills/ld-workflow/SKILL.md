@@ -62,9 +62,13 @@ Reglas:
 
 1. **Sin plan aprobado no hay ejecución.** Si falta, frenar con el mensaje
    "falta `/ld-discuss-task` para esto" + qué falta. Sin excepciones.
-2. Ejecutar fases en orden. Al terminar una fase `sensible: sí`: frenar, mostrar
-   diff/decisiones y pedir confirmación. Fases normales: loguear y seguir.
+2. Ejecutar fases en orden. Al terminar cada fase, sensible o no: commit en
+   el branch de trabajo (mensaje convencional, solo archivos de la fase).
+   Si es `sensible: sí`: además frenar, mostrar diff/decisiones y pedir
+   confirmación. Fases normales: commitear, loguear y seguir.
 3. Al terminar las fases: frenar siempre (revisión de bloque) antes del cierre.
+   El agente nunca ejecuta `difit` ni viewers interactivos: indica el comando
+   exacto (`difit <branch|commit>` desde el repo) y espera el veredicto.
    El cierre puede ejecutarse ahí o diferirse a `/ld-close-task` (ej. cuando el
    merge o la verificación posterior los hace el usuario). Sin plan aprobado,
    ninguno de los dos ejecuta.

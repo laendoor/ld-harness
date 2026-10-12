@@ -7,28 +7,35 @@
 // v0: lista mínima de patrones catastróficos en bash. Las deny-lists por
 // perfil viven en profiles/ (roadmap) y se cablean acá.
 
+// Nota: sin import de "@opencode/plugin" — Plugin.define es identidad y el
+// import estático rompería la carga si el runtime no lo resuelve para
+// archivos sueltos. El schema v2 solo pide { id, setup }.
 const CATASTROPHIC = [
 	/\brm\s+-rf?\s+\/$/, // rm -rf /
 	/\brm\s+-rf?\s+\/\*/, // rm -rf /*
 	/\bmkfs(\.|$|\s)/, // mkfs.*
 	/: ?\(\) ?\{ ?: ?\| ?: ?& ?\} ?;/, // fork bomb
 	/> ?\/dev\/sd[a-z]\b/, // overwrite de disco
-];
+]
 
-export const LdGatePlugin = async () => {
-	return {
-		"tool.execute.before": async (_input, output) => {
-			// ponytail: solo bash en v0; edit/write se gatean por permiso + perfil
-			const cmd =
-				output?.args?.command ?? output?.args?.cmd ?? output?.args?.script ?? "";
-			if (typeof cmd !== "string" || cmd.trim() === "") return;
-			for (const re of CATASTROPHIC) {
-				if (re.test(cmd)) {
-					throw new Error(
-						`[ld-gate] comando bloqueado por patrón catastrófico ${re}: ${cmd.slice(0, 120)}`,
-					);
-				}
-			}
-		},
-	};
-};
+function blockedCommand(input) {
+	// ponytail: solo bash en v0; edit/write se gatean por permiso + perfil
+	const cmd = input?.command ?? input?.cmd ?? input?.script ?? ""
+	if (typeof cmd !== "string" || cmd.trim() === "") return undefined
+	for (const re of CATASTROPHIC) {
+		if (re.test(cmd)) {
+			return `[ld-gate] comando bloqueado por patrón catastrófico ${re}: ${cmd.slice(0, 120)}`
+		}
+	}
+	return undefined
+}
+
+export default {
+	id: "ld-gate",
+	async setup(ctx) {
+		await ctx.tool.hook("execute.before", (event) => {
+			const reason = blockedCommand(event.input)
+			if (reason) throw new Error(reason)
+		})
+	},
+}

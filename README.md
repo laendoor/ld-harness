@@ -48,7 +48,9 @@ ld-harness/
 │       ld-self-review/ ld-start-ticket/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)
-│   └── ld-gate/            ← enforcement determinístico (deny, no "tratar de")
+│   ├── ld-gate/            ← enforcement determinístico (deny, no "tratar de")
+│   └── ld-format/          ← formateo estándar .md (Prettier + MD040); cada
+│                             proyecto puede pisarlo con `formatter` propio
 ├── profiles/               ← overlays por objetivo (personal/estudio/trabajo)
 ├── setup.sh                ← instalación idempotente en PC nueva
 └── .claude-plugin/marketplace.json

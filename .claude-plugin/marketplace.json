@@ -12,6 +12,12 @@
       "description": "Posture-switching communication style — infers register instead of one fixed tone.",
       "source": "./plugins/ld-prosa",
       "category": "productivity"
+    },
+    {
+      "name": "ld-format",
+      "description": "Standard markdown formatting (Prettier + MD040) on Write/Edit.",
+      "source": "./plugins/ld-format",
+      "category": "productivity"
     }
   ]
 }

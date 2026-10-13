@@ -108,7 +108,9 @@ mantiene igual para que funcione en ambos motores.
 
    Los skills y commands son symlinks y ven cada cambio al momento; los plugins
    Claude los copia a su cache al instalar, así que un cambio en un hook pide
-   `claude plugin update <plugin>@ld-harness`.
+   `claude plugin update <plugin>@ld-harness`. `ld-prosa` declara `version` en
+   su `plugin.json`: subila, o el update no ve el cambio. Los demás versionan por
+   SHA del commit, así que el cambio tiene que estar commiteado.
 4. Verificá: `ls -la ~/.config/opencode/skills/ ~/.claude/skills/ ~/.claude/commands/`
    muestra los symlinks `ld-*`; en Claude y en opencode `/ld` los autocompleta
 5. Actualizá Engram MCP si el ambiente no lo tiene (ver "Engram" abajo)

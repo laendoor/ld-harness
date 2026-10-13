@@ -115,7 +115,8 @@ Deterministic rules are repo-specific by nature — an OpenAPI drift check means
 So look for a rule pack, in this order, and use the first that exists:
 
 ```bash
-grep -l 'review\.scans' ~/.claude/skills/*/SKILL.md .claude/skills/*/SKILL.md 2>/dev/null
+grep -l 'review\.scans' ~/.claude/skills/*/SKILL.md .claude/skills/*/SKILL.md 2>/dev/null \
+  | xargs grep -l '^# Repo profiles'    # the adapters, not the harness skills that only define the slot
 ls .claude/skills/_review-pipeline.md 2>/dev/null
 ```
 

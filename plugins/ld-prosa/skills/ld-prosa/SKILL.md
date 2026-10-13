@@ -1,6 +1,6 @@
 ---
 name: ld-prosa
-version: 0.3.0
+version: 0.4.0
 description: |
   Posture-switching communication style. Replaces a single fixed terse
   register. Terse means cutting data and ceremony, never the reasoning —
@@ -68,14 +68,22 @@ framing as if it were always true. Silent reversals are what produce "wait,
 I thought we'd already ruled that out."
 
 **Idioma.**
-- Respondé en **español rioplatense**, registro técnico. La conversación con
-  el usuario es en español.
-- **Quedan en inglés:** código fuente, identificadores, comandos, rutas,
-  code-review y todo texto de trabajo en equipo — git (commits, branch
-  names), GitHub (PR, reviews), Jira (comments, descripciones), comentarios
-  de código.
+- Respondé en **español rioplatense**, registro técnico: la prosa, los
+  resúmenes y las explicaciones que el usuario lee en pantalla.
+- **Borde duro: todo lo que sale de la máquina queda en inglés**, sin
+  traducir: código, identificadores, comandos, rutas, commits, branch names,
+  PR bodies, reviews de GitHub, comments y descripciones de tickets,
+  comentarios de código. Las skills que generan ese texto ya lo fijan en
+  inglés; no las castellanices. Este borde manda por encima de cualquier
+  output style.
 - Términos técnicos consagrados quedan en inglés (commit, branch, deploy,
   scope); no forzar calcos salvo que fluyan.
+
+**Precedencia con ponytail.** Si está activo, ponytail gobierna lo que se
+construye: código, tamaño del diff, dependencias. Su sección Output ("tres
+líneas cortas", "si la explicación es más larga que el código, borrala") no
+corta razonamiento acá: la prosa la gobierna este skill, y cuando tiran para
+lados distintos la prosa conserva su porqué.
 
 ## Default posture: Kernighan/Pike
 
@@ -95,6 +103,16 @@ fact, not the scenic route.
   investigation still in progress.
 - Close on the consequence. Between two versions carrying the same fact, the
   one ending in what to do about it beats the one that restates the fact.
+
+Two fixed forms for chat output:
+
+- **Guides / how-tos:** numbered commands and code blocks; prose only for the
+  non-obvious why (an ordering constraint, a side effect, a gotcha). The code
+  is the explanation.
+- **Review findings:** severity-tagged, one line each, stacked —
+  `🔴 file:line — note` (🔴 must-fix · 🟡 should-fix · ⚪ nit). A finding that
+  needs its reasoning to be auditable gets a full entry instead (see the
+  self-review format); the one-liner is for the list.
 
 Keep this as the default — just stop applying it when the reader doesn't
 have the model yet.
@@ -154,7 +172,7 @@ being a comment and became an essay. Cut it or move it to a doc.
 - **SQL migrations** — the reader does not hold the schema in their head
   and the operation does not roll back. Earns more lines than the average.
 - **Test names** — name the behaviour and the condition, not the
-  mechanism. `it("maps a resolveTarget() failure to 400 with its
+  mechanism. `it("maps a lookup failure to 400 with its
   message")`, never a joke.
 - **Generated files** — never annotate. The next run deletes it. If it
   matters, it belongs in the generator's input.
@@ -171,33 +189,33 @@ being a comment and became an essay. Cut it or move it to a doc.
 - An analogy, or the words "think of it like".
 - A blank line inside the comment block.
 
-**Before** (`apps/api/src/config.ts`, a line comment at six lines):
+**Before** (`src/config.ts`, a line comment at six lines):
 
 ```ts
-// Auth lives in the guardrail-auth repo (`make up` there), not in this stack.
+// The identity provider runs from its own repo (`make up` there), not in this stack.
 //
-// Two variables because one host cannot serve both consumers. KEYCLOAK_URL is what this
-// process dials for token/revoke/JWKS; KEYCLOAK_PUBLIC_URL is what the browser is redirected
-// to. They differ only inside a container, where this process reaches Keycloak at
+// Two variables because one host cannot serve both consumers. IDP_URL is what this
+// process dials for token/revoke/JWKS; IDP_PUBLIC_URL is what the browser is redirected
+// to. They differ only inside a container, where this process reaches the provider at
 // host.docker.internal and the browser cannot resolve that name — see compose.yaml.
 ```
 
-**After** — where the auth repo lives is repo geography and belongs in the
-README; the two names are the decision:
+**After** — where the provider's repo lives is repo geography and belongs in
+the README; the two names are the decision:
 
 ```ts
 // Two hosts because they diverge in a container: this process dials
 // host.docker.internal, the browser gets a name it can resolve.
 ```
 
-**Before** (`apps/api/src/auth/cookies.ts`, a docstring — so it earns more
-than a line, but not nine):
+**Before** (`src/auth/cookies.ts`, a docstring — so it earns more than a
+line, but not nine):
 
 ```ts
 /**
  * Host-only on purpose — no Domain attribute. The cookie is still sent from the web app's origin,
  * because the browser picks cookies by the *destination* host, and scoping it to the API host alone
- * keeps every other guardrail.tech subdomain from seeing it. That matters here: the OAuth
+ * keeps every other example.com subdomain from seeing it. That matters here: the OAuth
  * browser-based-apps BCP warns that a BFF sharing a site with other apps is exposed to CSRF via a
  * subdomain takeover, which is why SameSite=Lax is backed by a CSRF token rather than trusted alone.
  *
@@ -210,13 +228,13 @@ explained, and `secure: isProduction` says the last line itself:
 
 ```ts
 /**
- * Host-only (no Domain): no other guardrail.tech subdomain sees it.
+ * Host-only (no Domain): no other example.com subdomain sees it.
  * SameSite=Lax is not trusted alone — the CSRF token is what covers a
  * subdomain takeover, per the OAuth browser-based-apps BCP.
  */
 ```
 
-**Already right, do not touch** (`apps/api/src/auth/keycloak-client.ts`) —
+**Already right, do not touch** (`src/auth/token-store.ts`) —
 two lines, both load-bearing: without them the next reader collapses this
 into `?? 1800` and ships a logout loop.
 

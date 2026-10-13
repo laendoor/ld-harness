@@ -92,7 +92,7 @@ Each heading in the template maps to an instruction. The template's own HTML com
 
 **Writing rules:**
 
-- **The repo's language** — whatever its merged PRs use (`gh pr list --state merged --limit 5 --json title`); English when there are none.
+- **English, always** — the PR is team-facing (ld-prosa's hard boundary).
 - **Imperative mood, and never "this PR does X"** — "normalize the score over evaluated domains", not "this PR normalizes the score". Straight from the kernel's `SubmittingPatches`.
 - **No people.** No names, no reviewer requests, no "coordinate with X" — unless the user explicitly asks for a reviewer.
 - **Never reference anything the reviewer cannot open.** No plan file, no scratch files, no chat. Reasoning that lives only in the plan gets rewritten into the body; a pointer to something private reads as if there is more to read and there is not.

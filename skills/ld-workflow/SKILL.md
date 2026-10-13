@@ -52,8 +52,7 @@ adapter: lo que cada proyecto aporta y los defaults cuando no hay adapter.
 - **Numeración:** decisiones, findings y fases se numeran y nunca se renumeran
   dentro de la tarea. Respondés por número; una que se cae "deja de existir", no
   corre a las demás.
-- **Commits:** convencionales, una línea, idioma según el historial del repo (o lo
-  que diga el adapter). Nunca en `main`/`master`, nunca push: ld-gate los bloquea.
+- **Commits:** convencionales, una línea, en inglés (borde duro de ld-prosa). Nunca en `main`/`master`, nunca push: ld-gate los bloquea.
 
 Formato del plan:
 

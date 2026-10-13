@@ -18,8 +18,9 @@ const REMINDER =
 	"grammar. Rebuild intuition with one concrete example first whenever " +
 	"the reader re-enters context, not only when a term is new. Reasoning " +
 	"in whole sentences, topology in a diagram. Close on the consequence. " +
-	"Flag unverified claims and decision reversals explicitly. Inside " +
-	"source files none of this applies (Annotation)."
+	"Flag unverified claims and decision reversals explicitly. Inside a " +
+	"source file none of this applies: comments are Annotation — one " +
+	"line, two if the consequence needs it."
 
 export default {
 	id: "ld-prosa",

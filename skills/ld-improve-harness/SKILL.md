@@ -45,7 +45,7 @@ Si algo falla: reportar, no seguir al paso 4.
 
 1. Mostrar diff + stat. Esperar OK explícito sobre el diff.
 2. Con OK: commit en un branch `improve/<slug>` (ld-gate bloquea commits en
-   `main` y todo push), mensaje claro en español o inglés según el historial.
+   `main` y todo push), mensaje claro en inglés.
 3. Pasar los comandos para que los corra el usuario:
    `git -C ~/dev/ld-harness switch main && git -C ~/dev/ld-harness merge --ff-only improve/<slug> && git -C ~/dev/ld-harness push`.
    Si `main` avanzó y el ff no entra: reportar, nunca resolver solo.

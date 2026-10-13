@@ -36,16 +36,17 @@ circuito donde corren.
 ```txt
 ld-harness/
 ├── commands/               ← entry points /ld-* (visibles en autocompletado)
-│   ├── ld-adr.md / ld-create-pr.md / ld-create-ticket.md
-│   ├── ld-discuss-task.md / ld-implement-task.md
-│   ├── ld-improve-harness.md / ld-sync.md
-│   └── ld-review-fix.md / ld-self-review.md / ld-start-ticket.md / ld-whats-next.md
+│   ├── ld-start-task.md / ld-implement-task.md / ld-self-review.md
+│   ├── ld-ship-task.md / ld-close-task.md
+│   ├── ld-adr.md / ld-create-pr.md / ld-create-ticket.md / ld-review-fix.md
+│   └── ld-improve-harness.md / ld-sync.md / ld-whats-next.md
 ├── skills/                 ← contratos completos (el agente los carga on-demand)
 │   ├── ld-adr/ / ld-improve-harness/ / ld-mem/
-│   ├── ld-workflow/        ← contrato discuss → implement (fases, gates, cierre, SHIP)
+│   ├── ld-workflow/        ← contrato start → implement → self-review → ship → close
+│   │                         + contrato del adapter (slots y defaults)
+│   ├── ld-self-review/     ← etapa self-review: triage local, fixups
 │   ├── ld-sync/            ← política de sync del propio harness (notify-only)
-│   └── ld-create-pr/ ld-create-ticket/ ld-review-fix/
-│       ld-self-review/ ld-start-ticket/ ld-whats-next/
+│   └── ld-create-pr/ ld-create-ticket/ ld-review-fix/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)
 │   ├── ld-gate/            ← enforcement determinístico: sin push, sin commit en main,
@@ -73,15 +74,20 @@ mantiene igual para que funcione en ambos motores.
 
 1. **Abrir.** `/ld-sync` si dudás del harness; si no, directo a trabajar.
    El agente consulta Engram solo (no arranca de cero).
-2. **Discutir.** `/ld-discuss-task <tarea>` (o el adapter del proyecto, ej.
-   `/aika-start-ticket 38`). Ajustás numerado, das el OK.
-3. **Ejecutar.** `/ld-implement-task`. El agente frena en gates sensibles y al
-   fin de bloque; vos hacés revisiones largas (diff + decisiones).
-4. **Cerrar.** `/ld-close-task` una vez mergeado el PR: cierre proporcional
-   (TEST/DOC/REVIEW) + SHIP propuesto, confirmado y ejecutado. Nada está
-   listo sin tu venia.
-5. **Handoff.** `/ld-mem` (o `fini-mem` / `aika-mem`) antes del `/clear`.
-6. **Mejorar.** Si algo del harness picó: `/ld-improve-harness <idea>` desde
+2. **Arrancar.** `/ld-start-task <ticket o tarea>` (o el adapter del proyecto,
+   ej. `/gr-start-task TL4CODE-123`): branch, plan y decisiones numeradas. Se
+   discute hasta que no quede ninguna abierta. No escribe código.
+3. **Implementar.** `/ld-implement-task`: fase = commit; después de una fase ⏸
+   frena y te pasa el `difit`; al terminar frena siempre para tu review. Tu
+   `review:` vuelve como fixups.
+4. **Self-review.** `/ld-self-review`: review de tercero con triage local
+   (fix · drop · defer · ticket) hasta que los fixes estén commiteados.
+5. **Ship.** Pusheás vos; `/ld-ship-task` abre el PR, pasa el ticket a review y
+   arma el aviso al canal. Todo lo que sale de la máquina espera tu OK.
+6. **Close.** Mergeado el PR, `/ld-close-task`: ticket a done, limpieza de
+   branch y plan, resumen en Engram.
+7. **Handoff.** `/ld-mem` (o `fini-mem` / `aika-mem`) antes del `/clear`.
+8. **Mejorar.** Si algo del harness picó: `/ld-improve-harness <idea>` desde
    donde estés.
 
 ## Instalación en PC o ambiente nuevo
@@ -110,7 +116,7 @@ mantiene igual para que funcione en ambos motores.
 
 Engram no es opcional: es el subsistema de memoria del harness.
 
-1. Al abrir trabajo (`ld-discuss-task`): `mem_context` y/o `mem_search` con
+1. Al abrir trabajo (`ld-start-task`): `mem_context` y/o `mem_search` con
    keywords de la tarea — no arrancar de cero lo ya decidido.
 2. Durante (`ld-implement-task`): `mem_save` proactivo ante cada decisión,
    bugfix, descubrimiento no-obvio o convención nueva (formato What/Why/Where/
@@ -139,10 +145,12 @@ El harness los usa pero no los contiene. Se instalan aparte:
 
 ## Adapters de proyecto
 
-Los comandos puntuales (`fini-*`, `aika-*`, ...) NO se absorben: se adelgazan.
-Cada uno aporta su contexto puntual y delega al general (`ld-discuss-task` /
-`ld-implement-task` / `ld-sync`). La migración es posterior a estabilizar los
-generales.
+Los comandos puntuales (`gr-*`, `fini-*`, `aika-*`, ...) no viven en el harness:
+son locales de cada máquina o proyecto. Cada uno carga una etapa de
+`ld-workflow` y llena sus slots (de dónde sale el ticket, paths críticos, check
+rápido, canal de ship…); la tabla de slots y sus defaults está en
+`skills/ld-workflow/SKILL.md` §9. Una regla de etapa que no le sirve a un adapter
+se cambia en el harness, no se pisa en el adapter.
 
 ## Pendientes
 

@@ -7,7 +7,7 @@ description: Documentar una decisión de diseño o arquitectura ya discutida com
 
 Documentás una decisión ya discutida y acordada. Generás el archivo con número
 correlativo y actualizás el índice. Nada más: no discutís la decisión acá
-(eso fue `/ld-discuss-task`), la registrás.
+(eso fue `/ld-start-task`), la registrás.
 
 ## Directorio de decisiones (lo define el adapter o el repo)
 

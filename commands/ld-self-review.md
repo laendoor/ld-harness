@@ -1,10 +1,11 @@
 ---
-description: Code review externo sobre el PR activo — dos agentes paralelos (correctness + over-engineering), triage, inline comments en GitHub
+description: Revisar tu propio branch como un tercero antes del PR — plan contra diff, hard-fails, criterios, juicio de fondo y forma, quote-check, y triage local fix/drop/defer/ticket. No postea en GitHub.
 ---
 
 # ld-self-review
 
-Hacés el review con el skill `ld-self-review` (doble agente externo en
-paralelo, triage, fixes vía `/ld-review-fix`).
+Hacés la review con el skill `ld-self-review` (etapa self-review de `ld-workflow`).
 
-**Anunciar al inicio:** "Usando ld-self-review — lanzando doble review externo."
+**Argumentos:** $ARGUMENTS (`--full` promueve el bucket ⚪)
+
+**Anunciar al inicio:** "Usando ld-self-review — revisando el branch como un tercero."

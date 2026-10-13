@@ -23,7 +23,7 @@ $ARGUMENTS (si vacío: pedila en una línea y recién ahí arrancá)
 - **Trivial** (typo, 1 línea, rename interno, link caído): aplicar directo,
   ir al paso 3.
 - **No-trivial** (skill/command nuevo, cambio de contrato, permisos, hooks):
-  mini-discuss numerado (dudas + propuesta/alternativa, formato de
+  decisiones numeradas con propuesta y alternativas (formato de
   `ld-workflow` pero corto) y frenar esperando OK.
 
 ### 2. Aplicar (solo con OK si fue no-trivial)

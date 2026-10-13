@@ -1,232 +1,237 @@
 ---
 name: ld-self-review
-description: Run an external code review on the current PR. Uses two parallel isolated agents (correctness + ponytail over-engineering lens). Presents findings in triage, lets the user validate each one, then posts validated findings as inline PR review comments.
-allowed-tools: Bash, Agent
+description: Revisar tu propio branch como lo haría un tercero, antes de que exista el PR y mientras un finding todavía es un fixup — reconcilia las fases del plan contra el diff, corre un scan determinista de hard-fails, cruza los criterios de aceptación y las decisiones, y hace una pasada de juicio de fondo (correctness, seguridad) y de forma (duplicación visible en el diff, diseño, lente ponytail, doc contra código). Quote-check para descartar findings alucinados, mapa de riesgo de qué commits leer línea por línea, y triage tuyo con cuatro verbos — fix (fixup) · drop · defer (deja un `ponytail:`) · ticket. No postea en GitHub ni corre gates de CI. Etapa self-review de ld-workflow; los adapters suman scans y lentes. Para un PR ajeno ya abierto, usar una review de PR, no esto.
+argument-hint: "[--full]"
+allowed-tools: Read, Grep, Glob, Edit, Skill, Bash
 ---
 
-# Self Review
+# ld-self-review
 
-Actúa como code reviewer externo sobre el PR activo. El review corre en **dos agentes paralelos** aislados — sin contexto de la conversación actual, solo ven el código y el diff.
+Revisás tu propio branch contra el plan que lo guió, antes del PR. No es una
+review de PR: acá un finding todavía es un fixup que se pliega en el commit de su
+fase; en el PR ya sería un comentario de otro y un commit "fix review".
 
-## Steps
+Contrato general: `~/dev/ld-harness/skills/ld-workflow/SKILL.md` (§1 convenciones,
+§9 slots). El adapter aporta `review.scans`, `review.lenses`, `ticket.fetch` y
+`plan.path`; sin adapter corren solo los pasos de acá.
 
-### 0. Verificar si ya existe un review guardado
+**`--full`** promueve el bucket ⚪ / `speculative` a entradas completas. El modo
+`full` del plan lo activa solo; el modo `fino` corre solo los pasos 1–3 (express).
 
-```bash
-gh pr view --json number,title,url,headRefName,baseRefName
-```
+## 0. Sin gates, y por qué
 
-Con el número de PR en mano, verificá si existe `.tmp/review-pr-{number}.md`:
+No corras typecheck, build, lint ni suites: CI los corre en cada branch. El
+reporte igual dice que no se corrieron y que los tiene CI; una omisión callada se
+lee como un paso salteado. La única excepción es un gate que el adapter declare
+(cuesta un segundo y su falla tira todo un stage de CI).
 
-```bash
-cat .tmp/review-pr-{number}.md 2>/dev/null
-```
-
-- Si existe: saltá directamente al **step 4** (triage) usando ese archivo. No relanzar los agentes.
-- Si no existe: continuá con el step 1.
-
-### 1. Obtener contexto del PR
-
-```bash
-gh pr diff
-gh pr view {number} --json headRefOid,files
-```
-
-Guardá: número de PR, título, diff completo, HEAD SHA, lista de archivos modificados.
-
-### 2. Leer convenciones del proyecto
-
-Leé el `CLAUDE.md` del proyecto actual para extraer: stack, convenciones de código, criterios de calidad específicos.
-
-### 2b. Obtener historial git de los archivos modificados
-
-Para cada archivo modificado (máximo 5 más relevantes):
+## 1. Resolver el objetivo y cachear el diff
 
 ```bash
-git log --oneline -10 -- {archivo}
+git status --porcelain     # tiene que estar vacío
+git branch --show-current
+git rev-parse --short HEAD
+git rev-list --count main..HEAD
 ```
 
-Este historial va al Agente A para detectar bugs por contexto histórico (ej: revertes, fixes recurrentes, patrones conocidos de la codebase).
+Árbol sucio → frenar: la review describe un estado al que se puede apuntar, y
+trabajo sin commitear no lo es.
 
-### 3. Lanzar dos agentes de review en paralelo — OBLIGATORIO
+Cachear el diff una vez, junto al plan, con el sha en el nombre para que un
+rebase lo invalide solo: `git diff main...HEAD > <dir del plan>/.review-<sha>.diff`.
+**Tres puntos**, no dos: con dos entra todo lo que llegó a `main` desde que nació
+el branch y se reporta trabajo ajeno como propio.
 
-**IMPORTANTE:** Lanzá ambos agentes **en el mismo mensaje**, como llamadas paralelas al `Agent` tool (`subagent_type: general-purpose`). No hagas el review vos mismo — el aislamiento garantiza independencia. Si no usás el Agent tool, el skill no sirve.
+## 2. Plan contra diff
 
-Construí ambos prompts reemplazando todos los placeholders con los valores reales. Cada prompt debe ser completamente autocontenido.
+Leer el plan del working tree (es scratch, nunca está en el diff). Por fase:
 
----
+- `[x]` sin cambio correspondiente en el diff → 🔴 `likely`. Decir la búsqueda
+  que se corrió: un grep que falló por adivinar mal el path no es un finding, y
+  decir la búsqueda es la única forma de distinguirlos. Antes de un 🔴, buscar por
+  basename: los paths del plan son prosa.
+- `[ ]` cuyo trabajo está en el diff → 🟡: el scope se adelantó y la próxima
+  corrida lo va a rehacer.
+- `[-]` → nunca finding, salvo que su trabajo esté en el diff igual (🟡, citando la
+  razón por la que se salteó).
+- Exentas: fases cuyo entregable no es código (verificación manual, decisiones).
 
-**Agente A — Correctness & Security:**
+Reportar como tabla corta aunque todo coincida: un resultado limpio tiene que
+verse como resultado, no como paso salteado.
+
+## 3. Scan determinista de hard-fails
+
+Salen de comandos, no de juicio: si no corriste el comando, no chequeaste la
+regla. Son `certain` y no pasan por el quote-check. `DIFF=<el diff cacheado>`.
+
+**3.a Secretos en líneas agregadas.** Un grep pelado no sabe de qué archivo vino
+cada línea y convierte cada fixture en una credencial filtrada; el `awk` arrastra
+el nombre del archivo:
+
+```bash
+awk '/^\+\+\+ b\// { f = substr($2, 3) } /^\+/ && !/^\+\+\+/ { print f "\t" $0 }' "$DIFF" \
+  | grep -iE '(password|secret|token|api[_-]?key)[[:space:]]*[=:][[:space:]]*"[^"$]' \
+  | grep -viE 'process\.env|os\.getenv|CHANGEME|changeme|placeholder|example|00000000'
+```
+
+Código de producción → 🔴. Tests, fixtures y templates `.example` → ⚪ en una sola
+línea colapsada. Nunca se descartan: una credencial real en un test llega al
+mismo repo.
+
+**3.b Higiene.**
+
+```bash
+grep -E '^\+\+\+ b/.*(\.(old|bak|orig)$|-(old|bak)\.[A-Za-z]+$)' "$DIFF"   # archivos de respaldo
+grep -nE '^\+(<<<<<<<|>>>>>>>|=======$)' "$DIFF"                          # marcadores de conflicto
+```
+
+Cualquier match → 🔴.
+
+**3.x Scans del adapter** (`review.scans`), en su orden. Los que marque como
+**mención obligatoria** no llevan severidad: dan una línea en el encabezado del
+reporte. "El diff tocó el borde de confianza o el deploy y nadie lo dijo" es la
+falla que existen para evitar; una severidad falsa sobre un refactor inocuo se
+descarta en el triage y se lleva la señal real con ella.
+
+## 4. Decisiones y criterios de aceptación
+
+Primero `## Decisiones` del plan: código que contradice una decisión registrada →
+🔴, citando la línea: es el acuerdo bajo el que se autorizó la corrida. Después
+el ticket (slot `ticket.fetch`), en las dos direcciones:
+
+- Un criterio que el branch no cumple → 🟡 `likely`, citándolo.
+- **Un criterio o decisión de diseño que el branch contradice → 🔴.** Es la
+  dirección que un review de PR no agarra, porque para entonces el ticket se lee
+  como la autoridad.
+- Scope que el ticket no describe → 🟡: el ticket necesita actualizarse, no el código.
+
+Ticket sin criterios, o tarea sin ticket: decirlo en una línea y seguir.
+
+## 5. Pasada de juicio
+
+Revisar el diff como alguien que no lo escribió. Dos tipos, ambos se reportan:
+
+- **De fondo** — el código hace algo mal: correctness y seguridad en los bordes
+  reales del repo (el adapter los nombra en `review.lenses`; una lista genérica da
+  findings genéricos).
+- **De forma** — anda y aun así está mal dejarlo: duplicación, diseño,
+  sobre-ingeniería. No son nits por defecto; la severidad dice si bloquea.
+
+Cuatro reglas:
+
+- **Lente ponytail: el mejor resultado del diff es achicarse.** Interface con una
+  implementación, factory de un producto, config que nadie setea, stdlib
+  reinventada. Nombrar qué cortar y qué lo reemplaza. Un test o un self-check
+  solo no es exceso: es el mínimo.
+- **Duplicación, solo la que muestra el diff.** No buscar gemelos en el repo: eso
+  cuesta lecturas e inventa findings con funciones que viven separadas a propósito.
+- **Doc contra código, sin elegir ganador de antemano.** Cuando el diff toca ambos
+  o cambia conducta que un doc tocado describe: reportar la divergencia citando
+  los dos lados y decir cuál *parece* más viejo y por qué. No reconciliar acá, no
+  auditar docs que el diff no tocó.
+- **No marcar lo que una herramienta ya agarra:** formato, orden de imports,
+  ancho de línea, tipos, locals sin usar.
+
+Cada finding lleva una `confidence` interna, no impresa: `certain` (el hunk lo
+prueba mecánicamente), `likely` (lo sostiene con juicio), `speculative` (sin cita
+inequívoca). Solo decide la ubicación: `speculative` va al bucket compacto.
+
+## 6. Quote-check
+
+Para cada finding del paso 5 (no los del 3), antes de mostrar nada:
+
+1. Buscar el `file:line` citado en el diff cacheado. No está → descartar
+   (`cite-not-in-diff`).
+2. Leer 5–10 líneas alrededor. No contienen lo que el claim nombra → descartar
+   (`claim-not-supported`).
+3. No agregar ni re-puntuar nada: es un chequeo de citas, no una segunda review.
+
+Una línea arriba del reporte, aunque no descarte nada:
+`Quote-check: descarté 2 de 9 candidatos (1 cite-not-in-diff, 1 claim-not-supported).`
+
+## 7. Reporte y triage
+
+Un solo listado en el chat. Nada de archivos, comentarios en el PR ni commits.
+
+Encabezado, solo las filas que dispararon:
 
 ```txt
-Sos un code reviewer senior haciendo un review independiente.
-
-**PR #{number}: {title}**
-
-No tenés historial de la conversación. Solo ves el diff y el contexto del proyecto.
-
-**Stack y convenciones del proyecto:**
-{contenido relevante del CLAUDE.md — stack, linting, testing, convenciones}
-
-**Historial reciente de archivos modificados:**
-{output de git log --oneline -10 por archivo}
-
-**Diff completo:**
-{diff}
-
-**Criterios de review (en orden de prioridad):**
-
-1. 🔴 CRÍTICO — bugs, vulnerabilidades de seguridad (OWASP top 10: injection, XSS, broken auth,
-   exposed secrets, insecure deserialization), pérdida de datos, race conditions, errores que rompen
-   funcionalidad core
-2. 🟡 IMPORTANTE — typing incorrecto o ausente, violaciones de convenciones del stack, lógica
-   cuestionable, falta de tests para lógica no trivial
-3. 🟢 MENOR — style, naming, oportunidades de simplificación, comentarios útiles faltantes
-
-**Instrucciones:**
-- Revisá el diff línea por línea
-- Para cada finding: indicá ruta exacta del archivo (relativa a la raíz del repo), número de línea
-  exacto en el archivo nuevo, categoría, descripción del problema y sugerencia concreta
-- Si una categoría no tiene findings, decilo explícitamente ("Sin hallazgos críticos")
-- Sé específico — no generalices ni repitas el código sin agregar valor
-- Ignorá cambios en lockfiles, archivos generados o configuración trivial salvo que haya algo crítico
-
-**Formato de output:**
-
-## Findings
-
-### 🔴 Críticos
-- **src/app/api/route.ts:42** — descripción del problema → sugerencia concreta
-
-### 🟡 Importantes
-- **src/app/api/route.ts:15** — descripción → sugerencia
-
-### 🟢 Menores
-- **src/app/api/route.ts:7** — descripción → sugerencia
-
-## Veredicto
-[una oración: "Approve" o "Request changes" + resumen ejecutivo en 1-2 líneas]
+Gates:     no corridos — CI los gatea en cada build del branch.
+Fases:     <tabla del paso 2>
+Criterios: <resultado del paso 4>
+Menciones: <one-liners de los scans de mención obligatoria>
 ```
 
----
-
-**Agente B — Over-engineering (Ponytail lens):**
+**Mapa de riesgo — dónde leer**, una línea por commit de fase, en tres niveles.
+Existe porque revisás una vez por tarea: es lo que hace que esa revisión gaste su
+profundidad donde un error cuesta.
 
 ```txt
-Sos un code reviewer senior especializado en detectar sobre-ingeniería y código innecesario.
-
-**PR #{number}: {title}**
-
-**Diff completo:**
-{diff}
-
-Tu único objetivo: encontrar qué se puede eliminar o simplificar. Ignorá bugs de correctness
-y seguridad — eso lo revisa otro agente.
-
-Para cada finding, una línea con formato exacto:
-`{ruta/archivo.ts}:L{line}: {tag}: {qué}. {reemplazo}.`
-
-Tags:
-- `delete:` código muerto o flexibilidad especulativa. Reemplazo: nada.
-- `stdlib:` cosa reimplementada que ya existe en stdlib. Nombrá la función.
-- `native:` dependencia o código para algo que la plataforma ya hace nativa. Nombrá el feature.
-- `yagni:` abstracción con una sola implementación, config que nadie setea, layer con un solo caller.
-- `shrink:` misma lógica, menos líneas. Mostrá la forma más corta.
-
-Si no hay nada para cortar: respondé solo "Lean already. Ship." y terminá.
-
-Al final: `net: -{N} lines possible.`
+Dónde leer:
+  línea por línea  a1b2c3d 2 · ⏸ migración — schema + datos
+  con atención     d4e5f6a 3 · orquestador — lógica nueva, sin path crítico
+  pasada rápida    0718293 4 · Tests · 1a2b3c4 5 · Docs
 ```
 
----
+Línea por línea: fases ⏸, commits con mención obligatoria y los que cita un 🔴.
+Con atención: lógica nueva fuera de eso. Pasada rápida: tests, docs, renames.
 
-### 3b. Guardar ambos reviews en disco
+Después los findings, más severos primero, numerados. **🔴 y 🟡, entrada completa:**
 
-Inmediatamente después de recibir ambos outputs:
+````markdown
+### N. 🔴 <el claim en una línea>
 
-```bash
-mkdir -p .tmp
-cat > .tmp/review-pr-{number}.md << 'EOF'
-# Review — Correctness & Security
+`file:line`
 
-{output completo del Agente A}
-
----
-
-# Review — Over-engineering (Ponytail)
-
-{output completo del Agente B}
-EOF
+```ts
+<el hunk más chico que lo prueba>
 ```
 
-Esto permite recuperar el review si la sesión se compacta antes de terminar el triage.
+**Qué pasa.** <2-4 oraciones: el mecanismo, qué tiene que ser cierto para que
+dispare, si está vivo hoy o latente, y qué se verificó.>
 
-### 4. Presentar findings al usuario en triage
+**Fix.** <qué hacer y su costo concreto — nunca "chico" o "fácil".> · **Si se deja:** <qué se acepta exactamente.>
+````
 
-Mostrá los findings consolidados de ambos agentes:
-
-1. Correctness: críticos → importantes → menores
-2. Ponytail: findings de over-engineering (o "Lean already. Ship." si no hay nada)
-
-Para los findings no-obvios, preguntá al usuario si los considera válidos antes de postear.
-
-### 5. Postear findings validados como inline comments
-
-Primero obtené el HEAD SHA y el owner/repo:
-
-```bash
-HEAD_SHA=$(gh pr view {number} --json headRefOid --jq '.headRefOid')
-OWNER_REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
-```
-
-Para cada finding validado que tenga archivo y línea específicos, postealo como **inline comment**:
-
-```bash
-gh api "repos/${OWNER_REPO}/pulls/{number}/comments" \
-  --method POST \
-  -f body="**[{emoji} {categoría}]** {descripción}
-
-> {sugerencia}" \
-  -f commit_id="${HEAD_SHA}" \
-  -f path="{ruta/relativa/archivo.ts}" \
-  -F line={numero_linea} \
-  -f side="RIGHT"
-```
-
-> **Nota:** GitHub solo acepta inline comments en líneas que aparecen en el diff. Si la línea no está
-> en el diff, posteá el finding como comment de cuerpo:
->
-> ```bash
-> gh pr review {number} --comment --body "**[{categoría}]** {descripción} → {sugerencia}"
-> ```
-
-Si hay críticos, además de los inline comments agregá un `--request-changes`:
-
-```bash
-gh pr review {number} --request-changes --body "$(cat .tmp/review-pr-{number}.md)"
-```
-
-No borres `.tmp/review-pr-{number}.md` — queda como registro y es liviano.
-
-### 6. Reportar resumen final
+**⚪ y `speculative`, bucket compacto**, una línea cada uno:
 
 ```txt
-Review completado:
-  🔴 Críticos posteados: N
-  🟡 Importantes posteados: N
-  🟢 Menores posteados: N
-  🔧 Ponytail (over-engineering): N
-
-PR: {url}
-
-Para aplicar los fixes: /ld-review-fix
+⚪ (7) — pedime el detalle por número si alguno te llama:
+  1. src/scans.controller.ts:44 — nombre inconsistente con el resto del módulo
 ```
 
-## Rules
+Cerrar con:
 
-- **Siempre usar el Agent tool** — nunca hacer el review en el contexto actual. Sin Agent tool, no hay
-  context fork y el review pierde independencia.
-- **Lanzar Agente A y Agente B en el mismo mensaje** — paralelo real, no secuencial.
-- El prompt de cada agente debe ser autocontenido: diff + contexto + criterios. Sin referencias a la sesión.
-- Nunca postear findings que el usuario descartó.
-- Si el diff está vacío o el PR no existe, abortá con mensaje claro.
+> Triage por número: `fix` · `drop` · `defer` (dejo un `ponytail:`) · `ticket`. Ej: `fix 1,3; defer 2; drop 4`.
+
+**Esperar la respuesta.** Algunos findings no se pueden zanjar desde el diff, y
+presentarlos como conclusiones en vez de candidatos es como una review empieza a
+ser ignorada.
+
+## 8. Ejecutar el triage
+
+El único paso que escribe, y solo sobre lo que marcaste.
+
+- **`fix`** → `git commit --fixup=<sha del commit de la fase>`.
+- **`drop`** → nada.
+- **`defer`** → un comentario `ponytail:` en el lugar del finding que nombra el
+  techo y el camino de upgrade (`// ponytail: map en memoria, cache por cuenta si
+  supera una réplica`). Un defer sin techo nombrable es un `drop`: decirlo.
+- **`ticket`** → no crearlo: pasarlo como semilla al skill de tickets del adapter
+  (o `ld-create-ticket`), que arma el draft y pregunta.
+
+Cerrar con lo que se arregló (fixup → fase) y lo que queda con su razón. Cuando
+aprobás: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash $(git merge-base main HEAD)`
+y `git log --oneline main..HEAD`. Siguiente: push (tuyo) → `/ld-ship-task`.
+
+## Qué no hace
+
+- **Nada en GitHub ni en el ticket.** No hay PR todavía.
+- **No arregla antes del triage.**
+- **No busca duplicados en el repo ni audita docs que el diff no tocó.**
+- **No lanza agentes en paralelo.** El diff es una sola lectura compartida, así
+  que repartirlo no ahorra trabajo, y rompe el quote-check, que solo vale cuando
+  un mismo lector verifica cada cita contra el mismo texto. Un diff demasiado
+  grande se parte por área, no por lente.
+- **No resume la tarea.** Qué cambió y por qué va al body del PR, en ship.
+- **No pushea.** Los únicos commits son fixups de lo que marcaste `fix`.

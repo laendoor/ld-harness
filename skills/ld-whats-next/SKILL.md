@@ -42,13 +42,13 @@ Issues disponibles:
 
 Sugerencia: #38 — prerequisito del resto de Fase 1.
 
-Para arrancar: /ld-start-ticket 38
+Para arrancar: /ld-start-task 38
 ```
 
 ### 6. Terminar con
 
 ```txt
-Para arrancar: /ld-start-ticket <número>
+Para arrancar: /ld-start-task <número>
 ```
 
 ## Rules

@@ -169,7 +169,7 @@ Capturar la URL del PR creado.
 PR creado: #{número} — {título}
 {url}
 
-Próximo paso: cuando el CI esté verde, corré /ld-self-review para una segunda revisión antes de mergear.
+Si viniste de /ld-ship-task, sigue con el ticket y el aviso al canal.
 ```
 
 ---

@@ -1,5 +1,5 @@
 ---
-name: ld-review-pr
+name: ld-code-review-pr
 description: Review someone else's open PR and post the result as one GitHub review — every finding anchored to its line, with a suggestion block where the fix is exact, plus a two-sentence general body (or an LGTM when clean). Picks up the repo's own review rule pack when it has one, falls back to a generic scan when it doesn't. Triages with you and waits for your authorization before anything reaches GitHub. Re-runs skip findings already commented and offer to resolve threads gone stale. For your own branch before a PR exists, use /ld-self-review (or the project's self-review adapter) instead.
 argument-hint: <pr-number-or-url> [--full]
 allowed-tools: Read, Grep, Glob, Bash(gh pr *), Bash(gh api *), Bash(gh auth *), Bash(git worktree *), Bash(git fetch *), Bash(git diff *), Bash(git log *), Bash(git show *), Bash(git rev-parse *), Bash(git check-ignore *), Bash(git remote *), Bash(grep:*), Bash(awk:*), Bash(jq:*), Bash(ls:*), Bash(cat:*), Bash(test:*), Bash(wc:*), Bash(mkdir:*), Write
@@ -81,7 +81,7 @@ The cache goes in `.claude/reviews/` **only if `.claude/` is actually ignored in
 runs in repos that have never heard of it, and a diff dump committed by accident is a real mess:
 
 ```bash
-git check-ignore -q .claude && CACHE=.claude/reviews || CACHE=${TMPDIR:-/tmp}/ld-review-pr
+git check-ignore -q .claude && CACHE=.claude/reviews || CACHE=${TMPDIR:-/tmp}/ld-code-review-pr
 mkdir -p "$CACHE"
 DIFF="$CACHE/pr-<n>-<sha>.diff"
 gh pr diff <n> > "$DIFF"
@@ -112,7 +112,8 @@ Hold both for Step 5 (dedupe) and Step 7 (resolve). Nothing is posted or resolve
 ## Step 4 — Rules: the repo's pack, or the generic fallback
 
 Deterministic rules are repo-specific by nature — an OpenAPI drift check means nothing in a Terraform repo.
-So look for a rule pack, in this order, and use the first that exists:
+An adapter that invokes this skill (`gr-code-review-pr`, …) names its pack directly — use that one and skip
+the discovery. Otherwise look for a rule pack, in this order, and use the first that exists:
 
 ```bash
 grep -l 'review\.scans' ~/.claude/skills/*/SKILL.md .claude/skills/*/SKILL.md 2>/dev/null \

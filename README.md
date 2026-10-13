@@ -39,7 +39,7 @@ ld-harness/
 │   ├── ld-start-task.md / ld-implement-task.md / ld-self-review.md
 │   ├── ld-ship-task.md / ld-close-task.md
 │   ├── ld-adr.md / ld-create-pr.md / ld-create-ticket.md
-│   ├── ld-review-pr.md / ld-review-fix.md
+│   ├── ld-code-review-pr.md / ld-review-fix.md
 │   └── ld-improve-harness.md / ld-sync.md / ld-whats-next.md
 ├── skills/                 ← contratos completos (el agente los carga on-demand)
 │   ├── ld-adr/ / ld-improve-harness/ / ld-mem/
@@ -48,7 +48,7 @@ ld-harness/
 │   ├── ld-self-review/     ← etapa self-review: triage local, fixups
 │   ├── ld-sync/            ← política de sync del propio harness (notify-only)
 │   ├── ld-create-pr/       ← body con evidencia; templates de fallback en templates/
-│   ├── ld-review-pr/       ← review de un PR ajeno, una sola review en GitHub
+│   ├── ld-code-review-pr/  ← review de un PR ajeno, una sola review en GitHub
 │   └── ld-create-ticket/ ld-review-fix/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)

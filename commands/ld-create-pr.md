@@ -1,5 +1,5 @@
 ---
-description: Crear un GitHub pull request con formato consistente — infiere título, body e issue del branch y los commits. Muestra preview antes de crear.
+description: Abrir un PR con un body accionable — problema con evidencia, encare y alternativa descartada, costo aceptado, riesgo y cómo verificar. Template del repo, preview antes de crear.
 ---
 
 # ld-create-pr

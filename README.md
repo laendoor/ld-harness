@@ -51,7 +51,6 @@ ld-harness/
 │   ├── ld-gate/            ← enforcement determinístico (deny, no "tratar de")
 │   └── ld-format/          ← formateo estándar .md (Prettier + MD040); cada
 │                             proyecto puede pisarlo con `formatter` propio
-├── profiles/               ← overlays por objetivo (personal/estudio/trabajo)
 ├── setup.sh                ← instalación idempotente en PC nueva
 └── .claude-plugin/marketplace.json
 ```
@@ -87,13 +86,20 @@ mantiene igual para que funcione en ambos motores.
 ## Instalación en PC o ambiente nuevo
 
 1. Cloná el repo: `git clone git@github.com:laendoor/ld-harness.git ~/dev/ld-harness`
-2. Corré el setup: `bash ~/dev/ld-harness/setup.sh` (con `--profile=trabajo` si
-   aplica; ver `profiles/`)
-3. En Claude Code: `/plugin marketplace add laendoor/ld-harness` y
-   `/plugin install ld-prosa@ld-harness`
-4. Verificá: `ls -la ~/.config/opencode/skills/ ~/.claude/skills/` muestra los
-   symlinks `ld-*`; en opencode escribí `/ld` y tienen que autocompletar los 3
-   comandos
+2. Corré el setup: `bash ~/dev/ld-harness/setup.sh`
+3. En Claude Code, el marketplace apunta al checkout (`directory`), no a GitHub:
+
+   ```bash
+   claude plugin marketplace add ~/dev/ld-harness
+   claude plugin install ld-prosa@ld-harness
+   claude plugin install ld-format@ld-harness
+   ```
+
+   Los skills y commands son symlinks y ven cada cambio al momento; los plugins
+   Claude los copia a su cache al instalar, así que un cambio en un hook pide
+   `claude plugin update <plugin>@ld-harness`.
+4. Verificá: `ls -la ~/.config/opencode/skills/ ~/.claude/skills/ ~/.claude/commands/`
+   muestra los symlinks `ld-*`; en Claude y en opencode `/ld` los autocompleta
 5. Actualizá Engram MCP si el ambiente no lo tiene (ver "Engram" abajo)
 
 `setup.sh` es idempotente: se puede correr de nuevo sin romper nada.
@@ -129,12 +135,6 @@ El harness los usa pero no los contiene. Se instalan aparte:
 - **find-skills** — descubre skills instalables (registry en <https://skills.sh/>).
 - **skill-creator** — crea y evalúa skills nuevos.
 
-## Perfiles (personal / estudio / trabajo)
-
-`profiles/` contiene solo overrides (permisos más estrictos, remotes, reglas).
-El core `ld-*` es idéntico en todos lados. `setup.sh --profile=<nombre>`
-aplica el overlay después de los symlinks. Sin perfil, default personal.
-
 ## Adapters de proyecto
 
 Los comandos puntuales (`fini-*`, `aika-*`, ...) NO se absorben: se adelgazan.
@@ -144,14 +144,6 @@ generales.
 
 ## Pendientes
 
-- [ ] **PC del trabajo (lunes):** clonar `ld-harness` en `~/dev/` (o mover el
-      checkout viejo de `claude-kit`) y correr `bash ~/dev/ld-harness/setup.sh`.
-      El remote ya se llama `ld-harness`: si el clone es viejo, actualizar remote
-      (`git remote set-url origin git@github.com:laendoor/ld-harness.git`).
-- [ ] **PC del trabajo (lunes):** en Claude Code, `/plugin marketplace add
-laendoor/ld-harness` + `/plugin install ld-prosa@ld-harness` (el marketplace
-      `claude-kit` quedó obsoleto; revisar si el plugin viejo sigue instalado y
-      removerlo).
-- [ ] Verificar que `/ld` autocompleta los 3 comandos en opencode.
-- [x] Migrar `create-pr` / `create-ticket` / `self-review` globales al harness.
-- [ ] Adelgazar `fini-*` / `aika-*` a adapters que delegan a los generales.
+- [ ] Verificar que `/ld` autocompleta en opencode.
+- [ ] Adelgazar `fini-*` / `aika-*` (PC personal) y `gr-*` (PC del trabajo) a
+      adapters que delegan a los generales.

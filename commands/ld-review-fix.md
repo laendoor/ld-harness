@@ -1,5 +1,5 @@
 ---
-description: Aplicar review comments del PR activo — propone fix por comentario, aplica los aprobados y pushea.
+description: Aplicar review comments del PR activo — propone fix por comentario, aplica los aprobados y commitea; el push es tuyo.
 ---
 
 # ld-review-fix

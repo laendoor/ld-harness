@@ -48,7 +48,8 @@ ld-harness/
 │       ld-self-review/ ld-start-ticket/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)
-│   ├── ld-gate/            ← enforcement determinístico (deny, no "tratar de")
+│   ├── ld-gate/            ← enforcement determinístico: sin push, sin commit en main,
+│   │                         sin patrones catastróficos (`bash plugins/ld-gate/test.sh`)
 │   └── ld-format/          ← formateo estándar .md (Prettier + MD040); cada
 │                             proyecto puede pisarlo con `formatter` propio
 ├── setup.sh                ← instalación idempotente en PC nueva
@@ -93,6 +94,7 @@ mantiene igual para que funcione en ambos motores.
    claude plugin marketplace add ~/dev/ld-harness
    claude plugin install ld-prosa@ld-harness
    claude plugin install ld-format@ld-harness
+   claude plugin install ld-gate@ld-harness
    ```
 
    Los skills y commands son symlinks y ven cada cambio al momento; los plugins

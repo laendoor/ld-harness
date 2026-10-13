@@ -10,6 +10,7 @@
 // Nota: sin import de "@opencode/plugin" — Plugin.define es identidad y el
 // import estático rompería la carga si el runtime no lo resuelve para
 // archivos sueltos. El schema v2 solo pide { id, setup }.
+// Misma lista que hooks/block-catastrophic.sh (Claude): si cambia una, cambiar la otra.
 const CATASTROPHIC = [
 	/\brm\s+-rf?\s+\/$/, // rm -rf /
 	/\brm\s+-rf?\s+\/\*/, // rm -rf /*

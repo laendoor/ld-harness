@@ -1,6 +1,6 @@
 ---
 name: ld-review-fix
-description: Read review comments on the current PR and propose fixes for each. Run after receiving code review feedback — reads inline comments, proposes concrete fixes, applies approved ones, and pushes.
+description: Read review comments on the current PR and propose fixes for each. Run after receiving code review feedback — reads inline comments, proposes concrete fixes, applies approved ones and commits; the user pushes.
 allowed-tools: Bash, Read, Glob, Edit
 ---
 
@@ -63,20 +63,17 @@ Cuando todos los fixes estén aplicados, stagear los archivos modificados y suge
 fix(review): address PR #{number} comments
 ```
 
-### 6. Push
+### 6. Push (lo hace el usuario)
 
-```bash
-git push
-```
-
-El PR se actualiza automáticamente — los comentarios que tenían fix aplicado quedan resueltos.
+ld-gate bloquea `git push`: mostrar el comando y frenar. Con el push, el PR se
+actualiza y los comentarios con fix aplicado quedan resueltos.
 
 ### 7. Reportar
 
 ```txt
 Fixes aplicados: N/{total}
 Saltados: N
-Push: ok — PR #{number} actualizado
+Push: pendiente — `git push` (lo corrés vos)
 ```
 
 ## Rules

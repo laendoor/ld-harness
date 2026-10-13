@@ -1,6 +1,6 @@
 ---
 name: ld-improve-harness
-description: Mejorar el propio ld-harness desde cualquier repo — captura la propuesta, la discute si no es trivial, valida, muestra diff y commitea+pushea solo con OK. El único comando que modifica el harness. Usar vía /ld-improve-harness.
+description: Mejorar el propio ld-harness desde cualquier repo — captura la propuesta, la discute si no es trivial, valida, muestra diff y commitea en un branch solo con OK; merge y push los hace el usuario. El único comando que modifica el harness. Usar vía /ld-improve-harness.
 ---
 
 # ld-improve-harness — el harness se opera a sí mismo
@@ -44,15 +44,17 @@ Si algo falla: reportar, no seguir al paso 4.
 ### 4. Ship (proponer → confirmar → ejecutar, como `ld-sync`)
 
 1. Mostrar diff + stat. Esperar OK explícito sobre el diff.
-2. Con OK: commit (mensaje claro, en español o inglés según historial del repo)
-   y push. Si el push se rechaza: NO forzar ni resolver solo — branch de
-   respaldo + fetch + reportar (precedente: push 12/10).
-3. Sin OK: dejar todo commiteado local o sin commitear según me pidan, y decir
+2. Con OK: commit en un branch `improve/<slug>` (ld-gate bloquea commits en
+   `main` y todo push), mensaje claro en español o inglés según el historial.
+3. Pasar los comandos para que los corra el usuario:
+   `git -C ~/dev/ld-harness switch main && git -C ~/dev/ld-harness merge --ff-only improve/<slug> && git -C ~/dev/ld-harness push`.
+   Si `main` avanzó y el ff no entra: reportar, nunca resolver solo.
+4. Sin OK: dejar todo commiteado local o sin commitear según me pidan, y decir
    qué falta.
 
 ## Prohibido
 
 - Tocar cualquier repo que no sea `$HARNESS` (ni el proyecto invocante).
 - `push --force`, resolver merges solo, commitear en otros repos.
-- Aplicar sin validar (paso 3) o pushear sin OK sobre el diff (paso 4).
+- Aplicar sin validar (paso 3) o commitear sin OK sobre el diff (paso 4).
 - Este skill no reemplaza a `ld-sync`: improve = cambiar, sync = transportar.

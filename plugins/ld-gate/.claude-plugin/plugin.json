@@ -1,0 +1,10 @@
+{
+  "name": "ld-gate",
+  "description": "Deterministic gates: no git push, no commit on main/master, no catastrophic shell patterns.",
+  "author": {
+    "name": "Leandro",
+    "url": "https://github.com/laendoor"
+  },
+  "homepage": "https://github.com/laendoor/ld-harness",
+  "license": "MIT"
+}

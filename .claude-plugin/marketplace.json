@@ -18,6 +18,12 @@
       "description": "Standard markdown formatting (Prettier + MD040) on Write/Edit.",
       "source": "./plugins/ld-format",
       "category": "productivity"
+    },
+    {
+      "name": "ld-gate",
+      "description": "Deterministic gates: no git push, no commit on main/master, no catastrophic shell patterns.",
+      "source": "./plugins/ld-gate",
+      "category": "productivity"
     }
   ]
 }

@@ -1,5 +1,5 @@
 ---
-description: Sync del propio ld-harness — check avisa si hay updates o pushes pendientes (default), apply los aplica con tu OK + doctor. Nunca aplica solo.
+description: Sync del propio ld-harness — check avisa si hay updates o pushes pendientes (default), apply hace el pull con tu OK + doctor; el push es tuyo. Nunca aplica solo.
 ---
 
 # ld-sync

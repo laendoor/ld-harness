@@ -1,5 +1,5 @@
 ---
-description: Mejorar el propio ld-harness — aplica, valida, muestra diff y commitea+pushea solo con tu OK. Invocable desde cualquier repo.
+description: Mejorar el propio ld-harness — aplica, valida, muestra diff y commitea en un branch solo con tu OK; merge y push son tuyos. Invocable desde cualquier repo.
 ---
 
 # ld-improve-harness

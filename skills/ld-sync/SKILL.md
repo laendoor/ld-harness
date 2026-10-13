@@ -1,6 +1,6 @@
 ---
 name: ld-sync
-description: Política de sync del propio ld-harness. Check = solo reporta (pull disponible / push pendiente) sin cambiar estado. Apply = fetch + diffs + aplica solo con OK explícito + doctor. Nunca pull/push automático. Usar vía /ld-sync.
+description: Política de sync del propio ld-harness. Check = solo reporta (pull disponible / push pendiente) sin cambiar estado. Apply = fetch + diffs + pull con OK explícito + doctor; el push lo hace el usuario. Nunca pull automático. Usar vía /ld-sync.
 ---
 
 # ld-sync — política de sync (notify-only)
@@ -23,7 +23,8 @@ Sin tocar estado (sin fetch, sin pull, sin push):
 2. Mostrar diff pull (`HEAD..@{u}`, stat + commits) y diff push (stat + commits
    locales no pusheados). Esperar OK explícito sobre los diffs.
 3. Con OK: `git pull --ff-only` (si hay merge, frenar y pedir instrucciones —
-   nunca resolver merge solo), luego `git push`.
+   nunca resolver merge solo). El push es mío (ld-gate lo bloquea): si hay
+   commits locales, mostrar `git -C ~/dev/ld-harness push` y frenar.
 4. Doctor post-sync:
    - frontmatter válido en todo `commands/*.md` y `skills/*/SKILL.md`
      (`name` + `description` presentes, `SKILL.md` en mayúsculas),

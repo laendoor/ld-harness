@@ -38,7 +38,7 @@ for f in "$HARNESS"/plugins/*/opencode-plugin.js; do
 	plugindir="$(basename "$(dirname "$f")")"
 	link "$f" "$HOME/.config/opencode/plugins/$plugindir.js"
 done
-echo "  (claude: claude plugin marketplace add ~/dev/ld-harness && claude plugin install ld-prosa@ld-harness && claude plugin install ld-format@ld-harness)"
+echo "  (claude: claude plugin marketplace add ~/dev/ld-harness && claude plugin install ld-prosa@ld-harness && claude plugin install ld-format@ld-harness && claude plugin install ld-gate@ld-harness)"
 
 echo "4/5 formatters default → opencode global (solo agrega, nunca pisa)"
 # ld-format: cada proyecto puede pisar con su propio `formatter` en opencode.json.

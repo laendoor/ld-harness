@@ -112,6 +112,11 @@ sin frenar. **No escribe código.**
    arriba de trabajo sin commitear. Si el branch actual ya es el de la tarea,
    seguir. Si no, cortarlo de `main` actualizado con el nombre del slot
    `branch.name` e imprimirlo en su propia línea. Cualquier falla → frenar, nunca forzar.
+   Con ticket, ya en el branch: el slot `ticket.start` lo asigna a quien corre y lo
+   pasa a en curso — después del branch, para que un corte fallido no deje un ticket
+   en curso sin trabajo. Asignado a otro → no reasignar: decirlo y preguntar. Ya más
+   adelante (review, QA, done) o sin transición a en curso → no mover, reportar. Una
+   línea en la respuesta con lo que hizo.
 3. **Leer el contexto:** el código que van a tocar las fases más lo que agregue el
    adapter. Un doc que contradice el código se marca, no se resuelve: cualquiera
    de los dos puede ser el viejo.
@@ -237,7 +242,7 @@ con estos slots. Lo que no esté definido acá usa el default del contrato.
 | --- | --- | --- |
 | `ticket.fetch` | De dónde sale la tarea y cómo leerla | GitHub issue (`gh issue view`) o el prompt |
 | `ticket.ref` | Cómo el PR referencia al ticket | `Closes #N` si hay issue; si no, nada |
-| `ticket.review` / `ticket.done` | Transiciones del ticket | Ninguna |
+| `ticket.start` / `ticket.review` / `ticket.done` | Transiciones del ticket; start también lo asigna a quien corre | Ninguna |
 | `branch.name` | Nombre y estrategia del branch | `<feat\|fix\|task>/<id>-<slug>` desde `main` |
 | `plan.path` | Dónde vive el plan | `.tmp/tasks/<id>/plan.md` |
 | `context` | Qué leer además del código | `CLAUDE.md` / `AGENTS.md` del repo |

@@ -21,8 +21,12 @@ if [[ -z "$FILE_PATH" ]]; then
 fi
 
 if [[ "$FILE_PATH" == *.md ]]; then
-  # 1. Prettier (global si existe, si no npx como fallback).
-  if command -v prettier &>/dev/null; then
+  # 1. Prettier: el de la extensión de VS Code primero (misma versión que el
+  #    save del editor, sin diff al guardar a mano), después global, después npx.
+  VSCODE_PRETTIER=$(ls -d "$HOME"/.vscode/extensions/esbenp.prettier-vscode-*/node_modules/prettier/bin/prettier.cjs 2>/dev/null | tail -1)
+  if [[ -n "$VSCODE_PRETTIER" ]] && command -v node &>/dev/null; then
+    node "$VSCODE_PRETTIER" --write "$FILE_PATH" 2>/dev/null
+  elif command -v prettier &>/dev/null; then
     prettier --write "$FILE_PATH" 2>/dev/null
   else
     npx --yes prettier --write "$FILE_PATH" 2>/dev/null

@@ -22,18 +22,21 @@ link() { # link <origen> <destino>
 	echo "  link: $2 -> $1"
 }
 
-echo "1/6 commands → opencode (autocompletado /ld-*)"
+echo "1/6 commands → opencode (autocompletado /ld-*) + claude (solo los sin skill gemelo)"
 for f in "$HARNESS"/commands/*.md; do
 	link "$f" "$HOME/.config/opencode/commands/$(basename "$f")"
+	# En Claude un skill ya es /comando: linkear el gemelo duplicaría el nombre.
+	[ -d "$HARNESS/skills/$(basename "$f" .md)" ] || link "$f" "$HOME/.claude/commands/$(basename "$f")"
 done
 
-echo "2/6 skills → opencode + claude"
+echo "2/6 skills → opencode + claude (los de plugins, solo opencode)"
 for d in "$HARNESS"/skills/*/ "$HARNESS"/plugins/*/skills/*/; do
 	[ -d "$d" ] || continue
 	name="$(basename "$d")"
 	[ "$name" = "skills" ] && continue
 	link "$d" "$HOME/.config/opencode/skills/$name"
-	link "$d" "$HOME/.claude/skills/$name"
+	# En Claude el skill de un plugin ya llega por el plugin (<plugin>:<skill>).
+	case "$d" in "$HARNESS"/plugins/*) ;; *) link "$d" "$HOME/.claude/skills/$name" ;; esac
 done
 
 echo "3/6 plugins → opencode"

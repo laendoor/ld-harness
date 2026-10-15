@@ -13,7 +13,9 @@
 // pide { id, setup }.
 
 const REMINDER =
-	"ld-prosa: default precise/terse — cut data and ceremony, never the " +
+	"ld-prosa: respondé en español rioplatense; lo que sale de la máquina " +
+	"(código, commits, PRs, tickets), en inglés. Default precise/terse — " +
+	"cut data and ceremony, never the " +
 	"reasoning (rules carry their why); compression removes ideas, never " +
 	"grammar. Rebuild intuition with one concrete example first whenever " +
 	"the reader re-enters context, not only when a term is new. Reasoning " +

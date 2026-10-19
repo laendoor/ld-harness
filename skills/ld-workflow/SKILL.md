@@ -47,6 +47,10 @@ adapter: lo que cada proyecto aporta y los defaults cuando no hay adapter.
   fases, reforzar lo flojo, sumar el nivel de integración que ninguna fase sola
   podía) y `Docs` (auditar los docs contra lo que cambió). Una que no aplica se
   escribe `[-]` con su razón, nunca se omite, así un refresh no la vuelve a agregar.
+- **Base:** el branch del que sale la tarea y al que vuelve por PR. `main` salvo que la
+  tarea nombre otra (un fix de QA va a su `release/*`). Start la escribe en `**Base:**`;
+  cada comando que dice `origin/<base>` la lee del plan, y sin plan o sin línea es `main`.
+  No sale del upstream de git: `git push -u` lo apunta a la copia remota del branch.
 - **Trabajo post-merge no es fase:** nada lo dispararía. Va a `## Pendiente de sync`.
 - **Severidad**, un solo léxico en todas las etapas: 🔴 must-fix · 🟡 should-fix · ⚪ nit.
 - **Numeración:** decisiones, findings y fases se numeran y nunca se renumeran
@@ -59,6 +63,7 @@ Formato del plan:
 ```markdown
 # <id> — <título corto>
 **Goal:** <1-2 líneas>
+**Base:** `<base>`
 **Branch:** `<branch>`
 **Modo:** <fino|normal|full> — <razón>
 
@@ -110,7 +115,7 @@ sin frenar. **No escribe código.**
    tarea viene en el prompt; si falta, pedirla en una línea.
 2. **Branch.** `git status --porcelain` sucio → frenar, nunca cambiar de branch
    arriba de trabajo sin commitear. Si el branch actual ya es el de la tarea,
-   seguir. Si no, cortarlo de `main` actualizado con el nombre del slot
+   seguir. Si no, cortarlo de `origin/<base>` recién fetcheado con el nombre del slot
    `branch.name` e imprimirlo en su propia línea. Cualquier falla → frenar, nunca forzar.
    Con ticket, ya en el branch: el slot `ticket.start` lo asigna a quien corre y lo
    pasa a en curso — después del branch, para que un corte fallido no deje un ticket
@@ -172,7 +177,7 @@ El turno cierra con:
 - la lista fase → commit (`sha subject`),
 - los resultados de los checks, fallas incluidas,
 - las decisiones del implementador, una línea cada una,
-- el comando para revisar todo: `difit HEAD $(git merge-base main HEAD)`.
+- el comando para revisar todo: `difit HEAD $(git merge-base origin/<base> HEAD)`.
 
 **El loop de review.** Respondés con un bloque `review:` de bullets.
 
@@ -180,8 +185,8 @@ El turno cierra con:
   Una fase = un commit es la unidad contra la que la self-review reconcilia el plan.
 - Resolver, no acusar recibo. Un bullet que pide un cambio aparece en el resumen;
   uno que pregunta, se contesta. Cambios y respuestas van en bloques separados.
-- Cuando aprobás: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash $(git merge-base main HEAD)`,
-  mostrar `git log --oneline main..HEAD` y sugerir `/ld-self-review`.
+- Cuando aprobás: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash $(git merge-base origin/<base> HEAD)`,
+  mostrar `git log --oneline origin/<base>..HEAD` y sugerir `/ld-self-review`.
 
 ## 6. Self-review — `/ld-self-review`
 
@@ -195,11 +200,11 @@ Lo que manda la tarea a review. Todo lo que sale de la máquina (PR, ticket, can
 se arma, se muestra y espera tu OK antes de salir.
 
 1. **Branch listo o frenar.** Árbol limpio, sin fixups pendientes de squash
-   (`git log --oneline main..HEAD | grep -c 'fixup!'` = 0), y el branch pusheado y
+   (`git log --oneline origin/<base>..HEAD | grep -c 'fixup!'` = 0), y el branch pusheado y
    al día con su upstream (`git status -sb` sin `ahead`). Falta el push → mostrar
    `git push -u origin <branch>` y frenar: el push es tuyo.
 2. **PR.** Con el skill `ld-create-pr`, pasándole la referencia al ticket del
-   slot `ticket.ref` (`Closes #N`, una key de Jira, nada). PR ya abierto: ofrecer
+   slot `ticket.ref` (`Closes #N`, una key de Jira, nada) y la base del plan. PR ya abierto: ofrecer
    actualizar el body si ya no coincide con el branch.
 3. **Ticket a review** por el slot `ticket.review` (comentar el link del PR y
    transicionar). Sin adapter: nada.
@@ -218,7 +223,9 @@ cierra, recién ahí pedirla en una línea.
 2. **Ticket a done** por el slot `ticket.done`. Sin adapter: nada.
 3. **Limpieza**, propuesta como checklist y ejecutada con tu OK: volver a `main`
    y `git pull --ff-only`, borrar el branch local (`git branch -d`, nunca `-D`:
-   si no está mergeado, que falle), borrar el directorio de la tarea
+   si no está mergeado, que falle; con otra base, correrlo parado en
+   `git switch --detach origin/<base>`, porque `-d` solo borra lo mergeado en HEAD),
+   borrar el directorio de la tarea
    (`.tmp/tasks/<id>/`) y lo que agregue el slot `close.cleanup`.
 4. `## Pendiente de sync` del plan: mostrarlo antes de borrar el plan, para que no
    se pierda con él.
@@ -243,7 +250,7 @@ con estos slots. Lo que no esté definido acá usa el default del contrato.
 | `ticket.fetch` | De dónde sale la tarea y cómo leerla | GitHub issue (`gh issue view`) o el prompt |
 | `ticket.ref` | Cómo el PR referencia al ticket | `Closes #N` si hay issue; si no, nada |
 | `ticket.start` / `ticket.review` / `ticket.done` | Transiciones del ticket; start también lo asigna a quien corre | Ninguna |
-| `branch.name` | Nombre y estrategia del branch | `<feat\|fix\|task>/<id>-<slug>` desde `main` |
+| `branch.name` | Nombre y estrategia del branch | `<feat\|fix\|task>/<id>-<slug>` desde `origin/<base>` (§1) |
 | `plan.path` | Dónde vive el plan | `.tmp/tasks/<id>/plan.md` |
 | `context` | Qué leer además del código | `CLAUDE.md` / `AGENTS.md` del repo |
 | `critical` | Paths que llevan ⏸ | auth, datos/migraciones, plata, borrado, infra |

@@ -9,6 +9,10 @@
 #
 # Idempotente y silencioso: si no hay prettier disponible igual aplica MD040;
 # si el archivo no es .md, no hace nada.
+#
+# Un repo con config de formato propia es dueño de su formato y no se toca:
+# reformatear el archivo entero en cada Edit le mete diffs ajenos, y Prettier
+# reescribe `_` intraword como énfasis (MCP_URL → MCP*URL en un CHANGELOG).
 
 if [ -n "$1" ]; then
   FILE_PATH="$1"
@@ -20,7 +24,22 @@ if [[ -z "$FILE_PATH" ]]; then
   exit 0
 fi
 
-if [[ "$FILE_PATH" == *.md ]]; then
+owns_formatting() {
+  local dir root
+  dir=$(cd "$(dirname "$1")" 2>/dev/null && pwd) || return 1
+  root=$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null) || return 1
+  while :; do
+    for f in biome.json biome.jsonc .prettierrc .prettierrc.json .prettierrc.yaml .prettierrc.yml \
+      .prettierrc.js .prettierrc.cjs .prettierrc.mjs prettier.config.js prettier.config.cjs \
+      prettier.config.mjs dprint.json .editorconfig; do
+      [[ -e "$dir/$f" ]] && return 0
+    done
+    [[ "$dir" == "$root" || "$dir" == "/" ]] && return 1
+    dir=$(dirname "$dir")
+  done
+}
+
+if [[ "$FILE_PATH" == *.md ]] && ! owns_formatting "$FILE_PATH"; then
   # 1. Prettier: el de la extensión de VS Code primero (misma versión que el
   #    save del editor, sin diff al guardar a mano), después global, después npx.
   VSCODE_PRETTIER=$(ls -d "$HOME"/.vscode/extensions/esbenp.prettier-vscode-*/node_modules/prettier/bin/prettier.cjs 2>/dev/null | tail -1)

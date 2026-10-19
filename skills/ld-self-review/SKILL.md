@@ -31,15 +31,17 @@ lee como un paso salteado. La única excepción es un gate que el adapter declar
 git status --porcelain     # tiene que estar vacío
 git branch --show-current
 git rev-parse --short HEAD
-git rev-list --count main..HEAD
+git rev-list --count origin/<base>..HEAD
 ```
+
+`<base>` es la línea `**Base:**` del plan, `main` si falta (contrato §1).
 
 Árbol sucio → frenar: la review describe un estado al que se puede apuntar, y
 trabajo sin commitear no lo es.
 
 Cachear el diff una vez, junto al plan, con el sha en el nombre para que un
-rebase lo invalide solo: `git diff main...HEAD > <dir del plan>/.review-<sha>.diff`.
-**Tres puntos**, no dos: con dos entra todo lo que llegó a `main` desde que nació
+rebase lo invalide solo: `git diff origin/<base>...HEAD > <dir del plan>/.review-<sha>.diff`.
+**Tres puntos**, no dos: con dos entra todo lo que llegó a la base desde que nació
 el branch y se reporta trabajo ajeno como propio.
 
 ## 2. Plan contra diff
@@ -221,8 +223,8 @@ El único paso que escribe, y solo sobre lo que marcaste.
   (o `ld-create-ticket`), que arma el draft y pregunta.
 
 Cerrar con lo que se arregló (fixup → fase) y lo que queda con su razón. Cuando
-aprobás: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash $(git merge-base main HEAD)`
-y `git log --oneline main..HEAD`. Siguiente: push (tuyo) → `/ld-ship-task`.
+aprobás: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash $(git merge-base origin/<base> HEAD)`
+y `git log --oneline origin/<base>..HEAD`. Siguiente: push (tuyo) → `/ld-ship-task`.
 
 ## Qué no hace
 

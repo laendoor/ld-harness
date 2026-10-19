@@ -54,8 +54,10 @@ ld-harness/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)
 │   ├── ld-gate/            ← enforcement determinístico: sin push, sin commit en main,
 │   │                         sin patrones catastróficos (`bash plugins/ld-gate/test.sh`)
-│   └── ld-format/          ← formateo estándar .md (Prettier + MD040); cada
-│                             proyecto puede pisarlo con `formatter` propio
+│   └── ld-format/          ← formateo estándar .md (Prettier + MD040); no toca
+│                             repos con config de formato propia (biome, prettier,
+│                             dprint, editorconfig); cada proyecto puede pisarlo
+│                             con `formatter` propio
 ├── setup.sh                ← instalación idempotente en PC nueva
 └── .claude-plugin/marketplace.json
 ```

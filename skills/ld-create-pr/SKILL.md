@@ -25,7 +25,7 @@ The ticket id comes from the branch name, through the adapter's `ticket.ref` sha
 
 **No ticket is a valid answer.** Some work has none. Replace the ticket line with `No ticket` and carry on — never block on it, and never invent one.
 
-Base branch: the branch's upstream target, `main` by default. Confirm when the branch was cut from something else, since a stacked PR against `main` shows a diff nobody asked for.
+Base branch: the plan's `**Base:**` line when the task has a plan, `main` otherwise — never the branch's upstream, which `git push -u` points at the branch's own remote copy. Confirm when the branch looks cut from something else, since a stacked PR against `main` shows a diff nobody asked for.
 
 ### 2. Run the mechanical gates
 

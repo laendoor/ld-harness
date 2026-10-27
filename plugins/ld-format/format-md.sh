@@ -51,16 +51,17 @@ if [[ "$FILE_PATH" == *.md ]] && ! owns_formatting "$FILE_PATH"; then
     npx --yes prettier --write "$FILE_PATH" 2>/dev/null
   fi
 
-  # 2. MD040: `txt` en fences de apertura sin lenguaje. Se trackea estado
-  #    (dentro/fuera) para no tocar el fence de cierre.
+  # 2. MD040: `txt` en fences de apertura sin lenguaje. Cierra solo un fence de
+  #    al menos el largo del que abrió y sin lenguaje: un ``` dentro de un ````
+  #    es contenido, y tratarlo como cierre rompe los bloques anidados.
   awk '
-    BEGIN { in_block = 0 }
-    /^```/ {
-      if (!in_block) {
-        in_block = 1
-        if ($0 == "```") { print "```txt"; next }
-      } else {
-        in_block = 0
+    match($0, /^```+/) {
+      n = RLENGTH; info = substr($0, n + 1)
+      if (!open) {
+        open = n
+        if (info == "") { print substr($0, 1, n) "txt"; next }
+      } else if (n >= open && info ~ /^[ \t]*$/) {
+        open = 0
       }
     }
     { print }

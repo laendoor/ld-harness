@@ -57,7 +57,7 @@ ld-harness/
 │   └── ld-format/          ← formateo estándar .md (Prettier + MD040); no toca
 │                             repos con config de formato propia (biome, prettier,
 │                             dprint, editorconfig); cada proyecto puede pisarlo
-│                             con `formatter` propio
+│                             con `formatter` propio (`bash plugins/ld-format/test.sh`)
 ├── setup.sh                ← instalación idempotente en PC nueva
 └── .claude-plugin/marketplace.json
 ```

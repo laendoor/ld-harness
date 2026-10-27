@@ -1,8 +1,8 @@
 ---
 name: ld-self-review
-description: Revisar tu propio branch como lo haría un tercero, antes de que exista el PR y mientras un finding todavía es un fixup — reconcilia las fases del plan contra el diff, corre un scan determinista de hard-fails, cruza los criterios de aceptación y las decisiones, y hace una pasada de juicio de fondo (correctness, seguridad) y de forma (duplicación visible en el diff, diseño, lente ponytail, doc contra código). Quote-check para descartar findings alucinados, mapa de riesgo de qué commits leer línea por línea, y triage tuyo con cuatro verbos — fix (fixup) · drop · defer (deja un `ponytail:`) · ticket. No postea en GitHub ni corre gates de CI. Etapa self-review de ld-workflow; los adapters suman scans y lentes. Para un PR ajeno ya abierto, usar una review de PR, no esto.
+description: Revisar tu propio branch como lo haría un tercero, antes de que exista el PR y mientras un finding todavía es un fixup — reconcilia las fases del plan contra el diff, corre un scan determinista de hard-fails, y un agente fresco, sin la conversación de la implementación, cruza los criterios de aceptación y las decisiones y hace una pasada de juicio de fondo (correctness, seguridad) y de forma (duplicación visible en el diff, diseño, lente ponytail, doc contra código). Quote-check para descartar findings alucinados, mapa de riesgo de qué commits leer línea por línea, y triage tuyo con cuatro verbos — fix (fixup) · drop · defer (deja un `ponytail:`) · ticket. No postea en GitHub ni corre gates de CI. Etapa self-review de ld-workflow; los adapters suman scans y lentes. Para un PR ajeno ya abierto, usar una review de PR, no esto.
 argument-hint: "[--full]"
-allowed-tools: Read, Grep, Glob, Edit, Skill, Bash
+allowed-tools: Read, Grep, Glob, Edit, Skill, Bash, Agent
 ---
 
 # ld-self-review
@@ -94,6 +94,37 @@ Cualquier match → 🔴.
 reporte. "El diff tocó el borde de confianza o el deploy y nadie lo dijo" es la
 falla que existen para evitar; una severidad falsa sobre un refactor inocuo se
 descarta en el triage y se lleva la señal real con ella.
+
+## El corte: los pasos 4 a 6 los corre un agente fresco
+
+Los pasos 1–3 son mecánicos y corren acá. El 4 (decisiones y criterios), el 5
+(juicio) y el 6 (quote-check) los corre **un** subagente sin esta conversación
+(Claude Code: `Agent`, tipo general-purpose; opencode: `task`), que devuelve sus
+findings a esta sesión; esta arma el reporte (7) y ejecuta el triage (8). El modo
+`fino` no lo lanza: corre solo 1–3.
+
+Por qué: esta sesión suele ser la que implementó. Sabe por qué escribió cada línea,
+así que lee el diff confirmando su propio razonamiento — un cliente HTTP nuevo al
+lado de uno que ya existía pasa como decisión, no como finding. Un lector sin esa
+conversación lo ve como código ajeno, que es lo que esta review promete.
+
+El brief lleva solo esto:
+
+- los paths de los diffs cacheados y la `<base>`;
+- el path del plan: fases y `## Decisiones`, donde vive el porqué acordado;
+- cómo leer el ticket (slot `ticket.fetch`), o "sin ticket";
+- las `review.lenses` del adapter, textuales, y `--full` si corre;
+- leer `AGENTS.md` / `CLAUDE.md` y `.claude/rules/*.md` del repo antes de juzgar;
+- correr los pasos 4, 5 y 6 de este archivo y devolver cada finding en el formato
+  del paso 7, con su `confidence`, más la línea del quote-check.
+
+Nunca va en el brief: el resumen de la implementación, decisiones que no están en
+el plan, ni qué mirar. Eso es el ancla que el corte saca. Si una decisión que
+importa no está en el plan, el finding que dispare es correcto: falta en el plan.
+
+Lo que vuelve se presenta entero: esta sesión no descarta ni re-puntúa findings
+del agente. Si cree que uno es falso por contexto que el agente no tenía, lo dice
+debajo en una línea (`Contexto: …`) y el triage es tuyo.
 
 ## 4. Decisiones y criterios de aceptación
 
@@ -231,9 +262,10 @@ y `git log --oneline origin/<base>..HEAD`. Siguiente: push (tuyo) → `/ld-ship-
 - **Nada en GitHub ni en el ticket.** No hay PR todavía.
 - **No arregla antes del triage.**
 - **No busca duplicados en el repo ni audita docs que el diff no tocó.**
-- **No lanza agentes en paralelo.** El diff es una sola lectura compartida, así
-  que repartirlo no ahorra trabajo, y rompe el quote-check, que solo vale cuando
-  un mismo lector verifica cada cita contra el mismo texto. Un diff demasiado
-  grande se parte por área, no por lente.
+- **Un solo agente, nunca varios en paralelo.** El de los pasos 4–6 existe para
+  sacar el ancla de quien implementó. Repartir el diff entre varios no ahorra
+  trabajo, y rompe el quote-check, que solo vale cuando un mismo lector verifica
+  cada cita contra el mismo texto. Un diff demasiado grande se parte por área, no
+  por lente.
 - **No resume la tarea.** Qué cambió y por qué va al body del PR, en ship.
 - **No pushea.** Los únicos commits son fixups de lo que marcaste `fix`.

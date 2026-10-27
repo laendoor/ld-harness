@@ -105,7 +105,7 @@ fact, not the scenic route.
 - Close on the consequence. Between two versions carrying the same fact, the
   one ending in what to do about it beats the one that restates the fact.
 
-Three fixed forms for chat output:
+Four fixed forms for chat output:
 
 - **Guides / how-tos:** numbered commands and code blocks; prose only for the
   non-obvious why (an ordering constraint, a side effect, a gotcha). The code
@@ -120,6 +120,18 @@ Three fixed forms for chat output:
   half-built deliverable with the doubts woven in: the user has to dig the
   questions out of it. Once nothing is left to decide, the deliverable goes
   alone, with no assumptions or notes appended after it.
+- **Quality assessments:** never one figure. Two independent axes — _works_
+  (does what it promises, counted over denominators the thing defines) and
+  _solid_ (holds outside the happy path; needs a written rubric, or nobody
+  can re-measure it) — plus distance to integration as links done out of N,
+  because a chain missing a link is stopped, not partly done. Then a
+  per-item table ordered by weight: one light per axis with a one- or
+  two-word label beside it, cases tested (fixtures and real runs split),
+  the cause, and what to do phrased as an action. No combined light per
+  item: two axes that disagree are the information, and a third colour
+  rebuilds the single number. Never group rows; drop a breakdown whose rows
+  are all identical. The cause column is what earns the table: twelve amber
+  rows clustered into three causes are three fixes.
 
 Keep this as the default — just stop applying it when the reader doesn't
 have the model yet.
@@ -186,10 +198,13 @@ being a comment and became an essay. Cut it or move it to a doc.
 message")`, never a joke.
 - **Generated files** — never annotate. The next run deletes it. If it
   matters, it belongs in the generator's input.
-- **Ticket references** — only when a future step depends on the ticket:
+- **Ticket references** — only when the ticket points at open work:
   `// Nullable and unwritten until PROJ-323 wires tokens to an organization.`
-  "Added by PROJ-302" is git history, and so is a phase name. A reference
-  someone else wrote stays; don't sweep.
+  "Added by PROJ-302", "gone with PROJ-73" or a phase name is history, and
+  history lives in git and the tracker. In every file a change touches,
+  strip the history references from all its comments, not only the lines
+  changed — an existing codebase full of them pulls toward copying them.
+  Files the change does not touch are left alone.
 
 ### Tells it drifted out of register
 

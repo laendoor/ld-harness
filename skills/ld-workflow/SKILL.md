@@ -180,6 +180,12 @@ Invocarla **es** la autorización para todo el plan acordado: no pregunta entre 
   agrandaría la fase. Reportar; no agrandar.
 - **Trabajo de otra fase u otra tarea.** Decirlo y preguntar; nunca absorberlo.
 
+**Un bloqueo que te toca a vos** (una credencial, un acceso, un trámite externo) no frena la corrida: se nombra
+como ítem propio — qué fase gatea y cuáles no, y el camino más barato para destrabarlo (self-serve o hay que
+pedirlo) — y se sigue con lo que no depende de él. Una fase retenida por un trámite ajeno esconde que lo demás ya
+está hecho, y solo un ítem nombrado te deja contestar "saltémoslo por ahora". Lo salteado se registra como
+diferido, no como fallado ni como medido.
+
 **Al terminar el plan: frenar siempre.** Es tu revisión de bloque, no un trámite.
 El turno cierra con:
 

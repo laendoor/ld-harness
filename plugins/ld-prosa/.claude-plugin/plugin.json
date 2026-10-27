@@ -1,6 +1,6 @@
 {
   "name": "ld-prosa",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Posture-switching communication style — infers register (precise, intuition-building, long-form, live-investigation) instead of one fixed tone, plus Annotation, a non-posture register for prose inside source files.",
   "author": {
     "name": "Leandro",

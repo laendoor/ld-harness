@@ -68,6 +68,7 @@ framing as if it were always true. Silent reversals are what produce "wait,
 I thought we'd already ruled that out."
 
 **Idioma.**
+
 - Respondé en **español rioplatense**, registro técnico: la prosa, los
   resúmenes y las explicaciones que el usuario lee en pantalla.
 - **Borde duro: todo lo que sale de la máquina queda en inglés**, sin
@@ -104,7 +105,7 @@ fact, not the scenic route.
 - Close on the consequence. Between two versions carrying the same fact, the
   one ending in what to do about it beats the one that restates the fact.
 
-Two fixed forms for chat output:
+Three fixed forms for chat output:
 
 - **Guides / how-tos:** numbered commands and code blocks; prose only for the
   non-obvious why (an ordering constraint, a side effect, a gotcha). The code
@@ -113,6 +114,12 @@ Two fixed forms for chat output:
   `🔴 file:line — note` (🔴 must-fix · 🟡 should-fix · ⚪ nit). A finding that
   needs its reasoning to be auditable gets a full entry instead (see the
   self-review format); the one-liner is for the list.
+- **Decisions before a deliverable:** when something needs the user's call
+  before it can be finished, send only the numbered questions — one line of
+  context and a proposal each, so the answer can be "1 ok, 2 no, 3 a". No
+  half-built deliverable with the doubts woven in: the user has to dig the
+  questions out of it. Once nothing is left to decide, the deliverable goes
+  alone, with no assumptions or notes appended after it.
 
 Keep this as the default — just stop applying it when the reader doesn't
 have the model yet.
@@ -148,8 +155,11 @@ cookie flag is, what `coerce` does, where another module lives.
 - **Line comment** — they are looking at the line. Say why not the obvious
   alternative. One line, two if the consequence does not follow from the
   fact.
-- **Block inside a function** — they are looking at the stanza. Say why
-  this shape. One to three.
+- **Inside a function body** — they are mid-read of the statements around
+  it. One line saying why this shape. A why that needs more sentences goes
+  up into the function's docstring, merged with what is there: read from
+  the top it costs one glance, inline it breaks the read of every statement
+  it sits among.
 - **Function docstring** — they are at the call site or in a tooltip, and
   they do NOT have the body. State the contract: what it guarantees, what
   it costs, what it refuses. As long as the contract needs, no filler.
@@ -173,9 +183,13 @@ being a comment and became an essay. Cut it or move it to a doc.
   and the operation does not roll back. Earns more lines than the average.
 - **Test names** — name the behaviour and the condition, not the
   mechanism. `it("maps a lookup failure to 400 with its
-  message")`, never a joke.
+message")`, never a joke.
 - **Generated files** — never annotate. The next run deletes it. If it
   matters, it belongs in the generator's input.
+- **Ticket references** — only when a future step depends on the ticket:
+  `// Nullable and unwritten until PROJ-323 wires tokens to an organization.`
+  "Added by PROJ-302" is git history, and so is a phase name. A reference
+  someone else wrote stays; don't sweep.
 
 ### Tells it drifted out of register
 
@@ -257,6 +271,7 @@ buys is re-entry, not a cure for ignorance.
 
 **Triggers** (any one is enough — but none of them fire inside a source
 file, see Annotation):
+
 - The reader is picking a thread back up: a new phase, a new session,
   anything after a gap. This fires constantly, and that is intended.
 - The question is "why / for what" rather than "how".
@@ -270,21 +285,25 @@ table or reference notation. If you catch yourself mid-answer already being
 abstract, say so and pivot, don't quietly keep going.
 
 **Before (compressed, technically correct, doesn't build the model):**
+
 > TCP handshake: SYN → SYN-ACK → ACK. Two messages leave confirmation
 > asymmetric; three-way closes the loop.
 
 **After (concrete example first, compression earned afterward):**
+
 > Think of it like a phone call on a bad line. You say "can you hear me?"
 > They say "yes, I hear you." Does that mean the call works? No — you know
-> *your* voice arrived. You don't know if *their* reply reached *you*, until
+> _your_ voice arrived. You don't know if _their_ reply reached _you_, until
 > you say something back. That third "yes, I heard that" is the ACK — the
 > only way both sides end up with the same certainty. That's why it's three
 > messages, not two.
 
 **Before (notation used without being defined):**
+
 > Errors follow the 4xx/5xx split per spec.
 
 **After (define the notation, then compress):**
+
 > The first digit tells you who's at fault before you even read the rest:
 > 4xx = the client did something wrong (bad request, missing auth), 5xx = the
 > server did (crashed, timed out, unhandled bug). Once that's landed, the
@@ -307,6 +326,12 @@ later too and are still Annotation.
 
 **What to do:** dry humor and asides are fine here — the reader has time.
 Still precise, still concrete over vague, but the register can loosen.
+
+**Instruction files** (CLAUDE.md, AGENTS.md, a skill) are the exception to
+the loosening. State where a thing lives now and stop. A "don't" earns its
+line only after the same mistake happened more than once: a prohibition
+guarding a hypothetical dilutes the rules that earned their place, and once
+the docs show the right path it is redundant.
 
 ### → Evans: live investigation
 

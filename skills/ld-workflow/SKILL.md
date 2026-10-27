@@ -57,23 +57,31 @@ adapter: lo que cada proyecto aporta y los defaults cuando no hay adapter.
   dentro de la tarea. Respondés por número; una que se cae "deja de existir", no
   corre a las demás.
 - **Commits:** convencionales, una línea, en inglés (borde duro de ld-prosa). Nunca en `main`/`master`, nunca push: ld-gate los bloquea.
+  ld-gate lee el comando como texto: juzga el repo de `git -C <path>`, si no el de un `cd <path>` inicial, si no
+  el cwd. Cuando el repo de la tarea no es el cwd, el path va literal (un `$VAR` llega sin expandir → DETACHED →
+  deny). Matchea `git … commit|merge|cherry-pick|revert|am` en cualquier parte del texto, heredocs incluidos: una
+  edición scripteada que los nombra va en un archivo. Crear el branch y commitear van en llamadas separadas,
+  porque el hook evalúa antes de que corra el `git switch -c`.
 
 Formato del plan:
 
 ```markdown
 # <id> — <título corto>
+
 **Goal:** <1-2 líneas>
 **Base:** `<base>`
 **Branch:** `<branch>`
 **Modo:** <fino|normal|full> — <razón>
 
 ## Fases
+
 - [ ] 1 · <fase de trabajo — con sus unit tests>
 - [ ] 2 · ⏸ <fase que toca un path crítico>
 - [ ] N · Tests (<qué cuenta acá, según el adapter>)
 - [ ] N+1 · Docs (auditar docs contra lo que cambió)
 
 ## Decisiones
+
 <una línea por decisión resuelta: `N · <qué se decidió> — <razón corta>`>
 ```
 
@@ -87,6 +95,7 @@ implementador y las agarra la self-review. Cero decisiones es un resultado norma
 
 ```markdown
 ### 🔴 1 · <qué se decide>
+
 <el problema, 1-3 oraciones>
 **Propuesta:** <la recomendación y su razón>
 **Alternativas:** <cuáles y por qué pierden, una oración>
@@ -130,12 +139,12 @@ sin frenar. **No escribe código.**
    del operador (un secreto, una credencial) son su propia fase. Plan existente:
    refrescar en el lugar, respetando tus fases, orden y redacción.
 5. **Responder en el chat** (no en el plan): `## Plan` (fases + modo), `## Qué hay
-   que hacer` (un párrafo: el problema y el encare, lo que necesita alguien que
+que hacer` (un párrafo: el problema y el encare, lo que necesita alguien que
    vuelve de un corte; riesgos a tener presentes van acá) y `## Decisiones
-   pendientes` en el formato de §2, ordenadas por severidad.
+pendientes` en el formato de §2, ordenadas por severidad.
 6. **Cerrar el loop.** Cada respuesta tuya → una línea en `## Decisiones`. Repetir
    lo que siga abierto. Sin nada abierto: `sin decisiones pendientes — corré
-   /ld-implement-task` (o el comando del adapter).
+/ld-implement-task` (o el comando del adapter).
 
 **Gate duro.** Lo único que dispara código es que invoques la etapa implement. No
 "dale", "ok", "seguí", ni que todas las decisiones estén contestadas.
@@ -178,6 +187,11 @@ El turno cierra con:
 - los resultados de los checks, fallas incluidas,
 - las decisiones del implementador, una línea cada una,
 - el comando para revisar todo: `difit HEAD $(git merge-base origin/<base> HEAD)`.
+
+**Pasos manuales** (una CLI de nube, psql, DNS, credenciales de CI, cirugía de state): van en la consola, como
+checklist numerado de comandos corribles, en el punto de la secuencia donde tocan, separados de lo automatizado y
+diciendo cuáles bloquean la fase siguiente. Un puntero al runbook no alcanza: el paso que vive solo en un doc se
+saltea, y la falla aparece mucho después como un apply roto o una config mal puesta en silencio.
 
 **El loop de review.** Respondés con un bloque `review:` de bullets.
 
@@ -245,17 +259,17 @@ con estos slots. Lo que no esté definido acá usa el default del contrato.
 <tabla de slots>
 ```
 
-| Slot | Qué define | Default sin adapter |
-| --- | --- | --- |
-| `ticket.fetch` | De dónde sale la tarea y cómo leerla | GitHub issue (`gh issue view`) o el prompt |
-| `ticket.ref` | Cómo el PR referencia al ticket | `Closes #N` si hay issue; si no, nada |
-| `ticket.start` / `ticket.review` / `ticket.done` | Transiciones del ticket; start también lo asigna a quien corre | Ninguna |
-| `branch.name` | Nombre y estrategia del branch | `<feat\|fix\|task>/<id>-<slug>` desde `origin/<base>` (§1) |
-| `plan.path` | Dónde vive el plan | `.tmp/tasks/<id>/plan.md` |
-| `context` | Qué leer además del código | `CLAUDE.md` / `AGENTS.md` del repo |
-| `critical` | Paths que llevan ⏸ | auth, datos/migraciones, plata, borrado, infra |
-| `check` | Check rápido por área | Los tests de lo tocado |
-| `closing` | Qué cuenta en Tests y Docs | Tests del área; docs que mencionan lo tocado |
-| `review.scans` / `review.lenses` | Scans y lentes extra de la self-review | Ninguno |
-| `ship.notify` | Canal y formato del aviso | Ninguno |
-| `close.cleanup` | Limpieza extra post-merge | Ninguna |
+| Slot                                             | Qué define                                                     | Default sin adapter                                        |
+| ------------------------------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------- |
+| `ticket.fetch`                                   | De dónde sale la tarea y cómo leerla                           | GitHub issue (`gh issue view`) o el prompt                 |
+| `ticket.ref`                                     | Cómo el PR referencia al ticket                                | `Closes #N` si hay issue; si no, nada                      |
+| `ticket.start` / `ticket.review` / `ticket.done` | Transiciones del ticket; start también lo asigna a quien corre | Ninguna                                                    |
+| `branch.name`                                    | Nombre y estrategia del branch                                 | `<feat\|fix\|task>/<id>-<slug>` desde `origin/<base>` (§1) |
+| `plan.path`                                      | Dónde vive el plan                                             | `.tmp/tasks/<id>/plan.md`                                  |
+| `context`                                        | Qué leer además del código                                     | `CLAUDE.md` / `AGENTS.md` del repo                         |
+| `critical`                                       | Paths que llevan ⏸                                             | auth, datos/migraciones, plata, borrado, infra             |
+| `check`                                          | Check rápido por área                                          | Los tests de lo tocado                                     |
+| `closing`                                        | Qué cuenta en Tests y Docs                                     | Tests del área; docs que mencionan lo tocado               |
+| `review.scans` / `review.lenses`                 | Scans y lentes extra de la self-review                         | Ninguno                                                    |
+| `ship.notify`                                    | Canal y formato del aviso                                      | Ninguno                                                    |
+| `close.cleanup`                                  | Limpieza extra post-merge                                      | Ninguna                                                    |

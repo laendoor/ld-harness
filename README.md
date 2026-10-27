@@ -113,6 +113,7 @@ mantiene igual para que funcione en ambos motores.
    `claude plugin update <plugin>@ld-harness`. `ld-prosa` declara `version` en
    su `plugin.json`: subila, o el update no ve el cambio. Los demás versionan por
    SHA del commit, así que el cambio tiene que estar commiteado.
+
 4. Verificá: `ls -la ~/.config/opencode/skills/ ~/.claude/skills/ ~/.claude/commands/`
    muestra los symlinks `ld-*`; en Claude y en opencode `/ld` los autocompleta
 5. Actualizá Engram MCP si el ambiente no lo tiene (ver "Engram" abajo)
@@ -158,6 +159,11 @@ son locales de cada máquina o proyecto. Cada uno carga una etapa de
 rápido, canal de ship…); la tabla de slots y sus defaults está en
 `skills/ld-workflow/SKILL.md` §9. Una regla de etapa que no le sirve a un adapter
 se cambia en el harness, no se pisa en el adapter.
+
+Un adapter que sirve a varios repos lleva al final un apéndice `# Repo profiles`,
+resuelto por `basename $(git remote get-url origin) .git`. Cada hecho vive una sola
+vez: la mecánica en el harness, lo del proyecto en la tabla de slots del adapter, lo
+de un repo en su perfil. Así un segundo clon del mismo repo resuelve el mismo perfil.
 
 ## Pendientes
 

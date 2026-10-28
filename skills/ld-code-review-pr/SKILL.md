@@ -1,8 +1,8 @@
 ---
 name: ld-code-review-pr
-description: Review someone else's open PR and post the result as one GitHub review — every finding anchored to its line, with a suggestion block where the fix is exact, plus a two-sentence general body (or an LGTM when clean). Picks up the repo's own review rule pack when it has one, falls back to a generic scan when it doesn't. Triages with you and waits for your authorization before anything reaches GitHub. Re-runs skip findings already commented and offer to resolve threads gone stale. For your own branch before a PR exists, use /ld-self-review (or the project's self-review adapter) instead.
+description: Review someone else's open PR and post the result as one GitHub review — every finding anchored to its line, with a suggestion block where the fix is exact, plus a two-sentence general body (or an LGTM when clean). Picks up the repo's own review rule pack when it has one, falls back to a generic scan when it doesn't. The judgment pass runs in two fresh agents — a personal one (rule pack, ticket, correctness, security) and one with ponytail-review — reconciled into one list tagged by origin, with an intent check and a calibration log. Triages with you and waits for your authorization before anything reaches GitHub. Re-runs skip findings already commented and offer to resolve threads gone stale. For your own branch before a PR exists, use /ld-self-review (or the project's self-review adapter) instead.
 argument-hint: <pr-number-or-url> [--full]
-allowed-tools: Read, Grep, Glob, Bash(gh pr *), Bash(gh api *), Bash(gh auth *), Bash(git worktree *), Bash(git fetch *), Bash(git diff *), Bash(git log *), Bash(git show *), Bash(git rev-parse *), Bash(git check-ignore *), Bash(git remote *), Bash(grep:*), Bash(awk:*), Bash(jq:*), Bash(ls:*), Bash(cat:*), Bash(test:*), Bash(wc:*), Bash(mkdir:*), Write
+allowed-tools: Read, Grep, Glob, Bash(gh pr *), Bash(gh api *), Bash(gh auth *), Bash(git worktree *), Bash(git fetch *), Bash(git diff *), Bash(git log *), Bash(git show *), Bash(git rev-parse *), Bash(git check-ignore *), Bash(git remote *), Bash(grep:*), Bash(awk:*), Bash(jq:*), Bash(ls:*), Bash(cat:*), Bash(test:*), Bash(wc:*), Bash(mkdir:*), Bash(printf:*), Bash(date:*), Write, Agent, Skill
 ---
 
 Review an open PR you did not write, and land the findings where they belong: on the lines.
@@ -12,6 +12,7 @@ a PR exists, so a finding becomes a commit. This one starts from a PR that alrea
 becomes a review comment.
 
 **Arguments:**
+
 - `$1` = PR number or URL. Missing → `gh pr list --state open --limit 20` and ask which.
 - `--full` = keep ⚪ and `speculative` findings. Default drops both.
 
@@ -145,7 +146,7 @@ repo-specific coverage you did not have is worse than admitting the gap.
 ### Generic scan (no pack)
 
 Secrets in added lines. The `awk` carries the filename through, because a bare `grep` over a diff matches a
-*line* without knowing which file it came from, and that turns every test fixture into a leaked credential:
+_line_ without knowing which file it came from, and that turns every test fixture into a leaked credential:
 
 ```bash
 awk '/^\+\+\+ b\// { f = substr($2, 3); next } /^\+/ { printf "%s\t", f; print }' "$DIFF" \
@@ -171,16 +172,25 @@ a few lines of stdlib do → 🟡, and name the stdlib call.
 Then read the repo's `CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md` if present, and treat their rules as the
 style and design checklist for the judgment pass.
 
-### Judgment pass (always, pack or not)
+### Judgment pass (always, pack or not) — two fresh agents
+
+The judgment pass runs in two subagents launched together, per
+`~/dev/ld-harness/skills/ld-review-reconcile/SKILL.md`: a **personal** one and one running **ponytail-review**
+on PR #<n> in the worktree. The deterministic scans above stay in this session — a grep needs no independence.
+The point is trust with less reading: what both flag is almost certainly real, what one flags alone is where to
+look, and the calibration log says over time how much each is worth.
+
+The personal agent's brief, on top of what the reconcile skill fixes: the worktree path `../<repo>-pr-<n>` and
+`$DIFF`; the pack's judgment lenses, or "no pack — generic"; the ticket, when the adapter provides one; and this
+scope:
 
 - **Correctness** — null handling, async misuse, unbounded in-process state, a changed contract breaking a
   caller that did not change. CI catches a compile break, not a logic break.
 - **Security at the real boundaries** — anything reading request input, auth and session handling, crypto,
   archive extraction, subprocess and SQL construction, and anything reachable before an auth check.
 - **Design** — reuse before reinvention: an HTTP client, a retry loop, a date parser the repo already has.
-- **Over-engineering** — the diff's best outcome is getting shorter. An interface with one implementation, a
-  factory for one product, config nobody sets. Name what to cut and what replaces it. Do **not** flag a single
-  test or self-check as bloat; that is the minimum, not excess.
+
+Over-engineering, load, speed and missing tests are ponytail's, not the personal agent's.
 
 **Don't flag what a tool already catches.** Formatting, import order, line width, unused locals: the repo's
 linter gates those and a finding about them is noise.
@@ -190,18 +200,11 @@ Severity is 🔴 must-fix · 🟡 should-fix · ⚪ nit. Every finding carries
 
 ### Quote-check
 
-For every judged finding (never the ones a shell command produced — those cite by construction):
-
-1. Look up the cited `file:line` in `$DIFF`. Absent → drop, reason `cite-not-in-diff`.
-2. Read 5–10 diff lines around it. If they do not contain the construct the claim names → drop, reason
-   `claim-not-supported`.
-3. Add nothing, re-score nothing. This is a citation check, not a second review.
-
-Print the result on one line. A pass that drops nothing still prints it — silence reads as "not run":
-
-```text
-Quote-check: dropped 2 of 9 candidates (1 cite-not-in-diff, 1 claim-not-supported).
-```
+Part of the reconciliation (`ld-review-reconcile` §2), run once in this session over the merged list — never the
+findings a shell command produced, which cite by construction. A cite must exist in the worktree at the PR head
+(`cite-not-found` otherwise); a cite outside the diff is valid — ponytail reads callers — and routes to the body
+in Step 6a, since it has no line to anchor. The count goes in the `Revisores` header line, even when nothing was
+dropped: silence reads as "not run".
 
 Read files from the worktree at `../<repo>-pr-<n>`, not from your own checkout — yours is on a different
 commit, and a claim verified against the wrong source is worse than no claim.
@@ -223,7 +226,7 @@ it.
 attention when it arrives next to two findings; the same nit is noise when it arrives next to eight.
 
 - **🔴 + 🟡 ≤ 3** → the ⚪ go into the table as ordinary rows and get triaged like everything else.
-- **More than 3** → they stay out of the table, and are listed *below* it collapsed, one line each:
+- **More than 3** → they stay out of the table, and are listed _below_ it collapsed, one line each:
   `⚪ apps/mcp/src/http.ts:51 — API key compared with === (not constant-time)`.
 
 Either way they are **listed, never silently dropped**, and either way the user can promote one by number at
@@ -234,23 +237,29 @@ puts everything in the table.
 Three is a threshold, not a law: it is the point where the inline comments stop reading as a short list and
 start reading as a wall. Move it if real runs say otherwise.
 
-Then the table:
+Open with the header and, when it differs, the Intención block of `ld-review-reconcile` §3 — intent compared
+against the ticket, since there is no plan, and no `Fases` row. Then the table, `ambos` first within each
+severity:
 
 ```text
-| # | Sev | Conf    | Location                        | Claim                                   | Destino |
-|---|-----|---------|---------------------------------|-----------------------------------------|---------|
-| 1 | 🔴  | certain | apps/mcp/src/http.ts:121        | Malformed Host header kills the process | Suggest |
-| 2 | 🟡  | likely  | apps/mcp/src/lib/api-client.ts  | No timeout, so the budget is not a cap  | Line    |
-| 3 | 🟡  | likely  | .gitignore                      | Route changed, spec never updated       | Body    |
+| # | Sev | Origen   | Conf    | Location                        | Claim                                   | Destino |
+|---|-----|----------|---------|---------------------------------|-----------------------------------------|---------|
+| 1 | 🔴  | ambos    | certain | apps/mcp/src/http.ts:121        | Malformed Host header kills the process | Suggest |
+| 2 | 🟡  | ponytail | likely  | apps/mcp/src/lib/api-client.ts  | No timeout, so the budget is not a cap  | Line    |
+| 3 | 🟡  | personal | likely  | .gitignore                      | Route changed, spec never updated       | Body    |
 ```
+
+Each 🔴 and 🟡 also gets its full entry below the table (Qué pasa · Caso · Fix · Si se deja, as in
+`ld-review-reconcile` §3): the table is for triage at a glance, the entry is what lets you agree without
+opening the code.
 
 Spell the destination out — `Line`, `Suggest`, `Body`, never initials. Print the legend under the table every
 time, because the column is meaningless to a reader who has not memorised it:
 
-```text
+````text
 Line = comment inline en la línea · Suggest = inline con bloque ```suggestion (botón "Commit suggestion")
 Body = al body del review, sin ancla de línea
-```
+````
 
 Deciding the destination **before** triage is the point — a finding you would phrase differently as a
 one-click suggestion than as a paragraph should be triaged knowing which it is.
@@ -265,8 +274,11 @@ Then:
 
 ### 6a — Route each kept finding
 
+**Nothing posted names the origin.** `ambos` / `personal` / `ponytail` stays in your triage and the calibration
+log: the author needs the problem, not which reviewer found it.
+
 **Inline is the default.** A finding goes to the body only when it has nowhere to anchor: it is about the PR
-as a whole, about a file absent from the diff, or about something *missing* — a route changed with no spec
+as a whole, about a file absent from the diff, or about something _missing_ — a route changed with no spec
 hunk has no line to point at, because the absence is the finding.
 
 **Recompute every anchor here. Never carry a line number forward.** A finding's `file:line` was written when
@@ -282,7 +294,7 @@ If the line the diff reports differs from the one the finding carried, **the dif
 stale, not the file. This is not hypothetical: a real run carried `analyze.ts:48` for a rethrow that lives at
 `:50`, which would have hung the comment off an unrelated line.
 
-**Anti-422 guard.** GitHub rejects the *entire* review — every comment, not just the bad one — if any inline
+**Anti-422 guard.** GitHub rejects the _entire_ review — every comment, not just the bad one — if any inline
 comment names a line absent from the diff. After recomputing, confirm each anchor appears in `$DIFF`. An
 anchor that does not hold gets **demoted to the body, never dropped**.
 
@@ -291,16 +303,16 @@ The anchor is the line in the new file (`side: RIGHT`) unless the finding is abo
 
 ### 6b — Inline comments → `$CACHE/pr-<n>-<sha>.comments.json`
 
-```jsonc
+````jsonc
 [
   {
     "path": "apps/mcp/src/http.ts",
     "line": 121,
     "side": "RIGHT",
-    "body": "🔴 Malformed `Host` header crashes the process (unauthenticated DoS).\n\n```suggestion\n\tlet url: URL;\n\ttry {\n\t\turl = new URL(req.url ?? \"/\", `http://${req.headers.host ?? \"localhost\"}`);\n\t} catch {\n\t\tsendRpcError(res, 400, \"Invalid request URL\");\n\t\treturn;\n\t}\n```\n\n**Why:** Node accepts spaces in header values, so `Host: exa mple` throws `ERR_INVALID_URL` synchronously → `uncaughtException` → exit. This runs before the API-key gate, so no credential is needed."
-  }
+    "body": "🔴 Malformed `Host` header crashes the process (unauthenticated DoS).\n\n```suggestion\n\tlet url: URL;\n\ttry {\n\t\turl = new URL(req.url ?? \"/\", `http://${req.headers.host ?? \"localhost\"}`);\n\t} catch {\n\t\tsendRpcError(res, 400, \"Invalid request URL\");\n\t\treturn;\n\t}\n```\n\n**Why:** Node accepts spaces in header values, so `Host: exa mple` throws `ERR_INVALID_URL` synchronously → `uncaughtException` → exit. This runs before the API-key gate, so no credential is needed.",
+  },
 ]
-```
+````
 
 Per comment, ≤12 lines, and it must carry **both halves — what is wrong, and how to fix it.** A comment that
 only names the defect makes the author do the diagnosis twice. Shape:
@@ -317,7 +329,7 @@ only names the defect makes the author do the diagnosis twice. Shape:
 
 Nothing qualifies → write `[]`.
 
-**Suggestion blocks — when, and the trap.** A ` ```suggestion ` block replaces *exactly* the anchored lines and
+**Suggestion blocks — when, and the trap.** A ` ```suggestion ` block replaces _exactly_ the anchored lines and
 gives the author a "Commit suggestion" button. Use it when the replacement is literal and complete: a changed
 argument, a swapped comparison, a tightened regex. Do **not** use it for a fix that spans lines the comment
 does not anchor, or that the author has to adapt — a half-right suggestion is a wrong commit one click away,
@@ -358,7 +370,7 @@ else is the author's own PR description quoted back at them.
 **Never restate CI.** The checks are rendered on the PR, above your review. "CI is green" adds nothing; a red
 check is worth a sentence only when it changes what you are asking for.
 
-What *does* belong is what the author cannot see from their own diff: **your verification.** "Ran the guard on
+What _does_ belong is what the author cannot see from their own diff: **your verification.** "Ran the guard on
 Node 24.18.0 (exits 0) and confirmed the drift check passes against all 16 workspaces" is evidence they did
 not have. That distinction — description out, verification in — is the whole rule.
 
@@ -403,6 +415,7 @@ Print the body and one line per inline comment (`path:line` + its first line). T
 place anything reaches GitHub:
 
 > Postear el review?
+>
 > - `comment` — deja los findings sin bloquear el merge
 > - `request-changes` — bloquea (recomendado si hay 🔴)
 > - `approve` — aprueba con los comments adjuntos
@@ -440,11 +453,15 @@ gh pr view <n> --json reviews --jq '.reviews[-1] | {author: .author.login, state
 ```
 
 > Review posteado. Worktree en `../<repo>-pr-<n>`:
+>
 > ```bash
 > git worktree remove ../<repo>-pr-<n>
 > ```
 
 Print it on `print only` too. The worktree exists either way.
+
+Then one line per finding that reached the triage in the calibration log (`ld-review-reconcile` §4, `skill` =
+`code-review`, `ref` = `PR#<n>`, `verdict` = `post` or `drop`) — on `print only` too, since the triage happened.
 
 ### Resolving stale threads
 
@@ -463,6 +480,7 @@ gh api graphql -f query='mutation($id:ID!){ resolveReviewThread(input:{threadId:
 ## Step 8 — Cleanup (recommend, don't run)
 
 > Worktree en `../<repo>-pr-<n>`. Cuando termines:
+>
 > ```bash
 > git worktree remove ../<repo>-pr-<n>
 > ```

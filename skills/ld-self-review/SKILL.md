@@ -1,6 +1,6 @@
 ---
 name: ld-self-review
-description: Revisar tu propio branch como lo haría un tercero, antes de que exista el PR y mientras un finding todavía es un fixup — reconcilia las fases del plan contra el diff, corre un scan determinista de hard-fails, y un agente fresco, sin la conversación de la implementación, cruza los criterios de aceptación y las decisiones y hace una pasada de juicio de fondo (correctness, seguridad) y de forma (duplicación visible en el diff, diseño, lente ponytail, doc contra código). Quote-check para descartar findings alucinados, mapa de riesgo de qué commits leer línea por línea, y triage tuyo con cuatro verbos — fix (fixup) · drop · defer (deja un `ponytail:`) · ticket. No postea en GitHub ni corre gates de CI. Etapa self-review de ld-workflow; los adapters suman scans y lentes. Para un PR ajeno ya abierto, usar una review de PR, no esto.
+description: Revisar tu propio branch como lo haría un tercero, antes de que exista el PR y mientras un finding todavía es un fixup — reconcilia las fases del plan contra el diff, corre un scan determinista de hard-fails, y dos agentes frescos, sin la conversación de la implementación — uno personal (criterios, decisiones, reglas del repo, correctness, seguridad) y uno con ponytail-review (calidad general, lean, carga, tests) — cuyos findings se concilian en una lista con origen (ambos · personal · ponytail). Quote-check para descartar findings alucinados, chequeo de intención contra el plan, log de calibración por origen, mapa de riesgo de qué commits leer línea por línea, y triage tuyo con cuatro verbos — fix (fixup) · drop · defer (deja un `ponytail:`) · ticket. No postea en GitHub ni corre gates de CI. Etapa self-review de ld-workflow; los adapters suman scans y lentes. Para un PR ajeno ya abierto, usar una review de PR, no esto.
 argument-hint: "[--full]"
 allowed-tools: Read, Grep, Glob, Edit, Skill, Bash, Agent
 ---
@@ -95,36 +95,31 @@ reporte. "El diff tocó el borde de confianza o el deploy y nadie lo dijo" es la
 falla que existen para evitar; una severidad falsa sobre un refactor inocuo se
 descarta en el triage y se lleva la señal real con ella.
 
-## El corte: los pasos 4 a 6 los corre un agente fresco
+## El corte: los pasos 4 y 5 los corren dos agentes frescos
 
-Los pasos 1–3 son mecánicos y corren acá. El 4 (decisiones y criterios), el 5
-(juicio) y el 6 (quote-check) los corre **un** subagente sin esta conversación
-(Claude Code: `Agent`, tipo general-purpose; opencode: `task`), que devuelve sus
-findings a esta sesión; esta arma el reporte (7) y ejecuta el triage (8). El modo
-`fino` no lo lanza: corre solo 1–3.
+Los pasos 1–3 son mecánicos y corren acá. El 4 (decisiones y criterios) y el 5
+(juicio) los corren dos subagentes sin esta conversación, según
+`~/dev/ld-harness/skills/ld-review-reconcile/SKILL.md`: uno **personal** y uno con
+**ponytail-review**. El 6 es la conciliación de esa skill; el 7 y el 8 vuelven acá.
+El modo `fino` no los lanza: corre solo 1–3.
 
-Por qué: esta sesión suele ser la que implementó. Sabe por qué escribió cada línea,
-así que lee el diff confirmando su propio razonamiento — un cliente HTTP nuevo al
-lado de uno que ya existía pasa como decisión, no como finding. Un lector sin esa
-conversación lo ve como código ajeno, que es lo que esta review promete.
+Por qué fuera de esta sesión: suele ser la que implementó. Sabe por qué escribió
+cada línea, así que lee el diff confirmando su propio razonamiento — un cliente HTTP
+nuevo al lado de uno que ya existía pasa como decisión, no como finding. Por qué
+dos: lo que marcan los dos es casi seguro real, lo que marca uno solo es donde vale
+mirar, y el log de calibración dice cuánto vale cada uno.
 
-El brief lleva solo esto:
+El brief del personal, además de lo que fija la skill de conciliación:
 
 - los paths de los diffs cacheados y la `<base>`;
 - el path del plan: fases y `## Decisiones`, donde vive el porqué acordado;
 - cómo leer el ticket (slot `ticket.fetch`), o "sin ticket";
 - las `review.lenses` del adapter, textuales, y `--full` si corre;
-- leer `AGENTS.md` / `CLAUDE.md` y `.claude/rules/*.md` del repo antes de juzgar;
-- correr los pasos 4, 5 y 6 de este archivo y devolver cada finding en el formato
-  del paso 7, con su `confidence`, más la línea del quote-check.
+- correr los pasos 4 y 5 de este archivo.
 
-Nunca va en el brief: el resumen de la implementación, decisiones que no están en
-el plan, ni qué mirar. Eso es el ancla que el corte saca. Si una decisión que
+Nunca va en ningún brief: el resumen de la implementación, decisiones que no están
+en el plan, ni qué mirar. Eso es el ancla que el corte saca. Si una decisión que
 importa no está en el plan, el finding que dispare es correcto: falta en el plan.
-
-Lo que vuelve se presenta entero: esta sesión no descarta ni re-puntúa findings
-del agente. Si cree que uno es falso por contexto que el agente no tenía, lo dice
-debajo en una línea (`Contexto: …`) y el triage es tuyo.
 
 ## 4. Decisiones y criterios de aceptación
 
@@ -140,27 +135,23 @@ el ticket (slot `ticket.fetch`), en las dos direcciones:
 
 Ticket sin criterios, o tarea sin ticket: decirlo en una línea y seguir.
 
-## 5. Pasada de juicio
+## 5. Pasada de juicio (agente personal)
 
-Revisar el diff como alguien que no lo escribió. Dos tipos, ambos se reportan:
+Revisar el diff como alguien que no lo escribió, en lo que solo este agente puede
+ver: correctness y seguridad en los bordes reales del repo (el adapter los nombra
+en `review.lenses`; una lista genérica da findings genéricos), incluidos los
+callers de un contrato que el diff cambia, y el contrato del repo — sus
+`.claude/rules` y convenciones, como reusar el cliente HTTP que ya existe. La forma
+— duplicación, diseño, sobre-ingeniería — junto con la carga y los tests faltantes,
+es del agente ponytail.
 
-- **De fondo** — el código hace algo mal: correctness y seguridad en los bordes
-  reales del repo (el adapter los nombra en `review.lenses`; una lista genérica da
-  findings genéricos).
-- **De forma** — anda y aun así está mal dejarlo: duplicación, diseño,
-  sobre-ingeniería. No son nits por defecto; la severidad dice si bloquea.
+Tres reglas:
 
-Cuatro reglas:
-
-- **Lente ponytail: el mejor resultado del diff es achicarse.** Interface con una
-  implementación, factory de un producto, config que nadie setea, stdlib
-  reinventada. Nombrar qué cortar y qué lo reemplaza. Un test o un self-check
-  solo no es exceso: es el mínimo.
-- **Duplicación, solo la que muestra el diff.** No buscar gemelos en el repo: eso
-  cuesta lecturas e inventa findings con funciones que viven separadas a propósito.
+- **Cada 🔴 y 🟡 necesita un caso concreto:** esta entrada o situación da este
+  resultado incorrecto. Sin caso no hay finding.
 - **Doc contra código, sin elegir ganador de antemano.** Cuando el diff toca ambos
   o cambia conducta que un doc tocado describe: reportar la divergencia citando
-  los dos lados y decir cuál *parece* más viejo y por qué. No reconciliar acá, no
+  los dos lados y decir cuál _parece_ más viejo y por qué. No reconciliar acá, no
   auditar docs que el diff no tocó.
 - **No marcar lo que una herramienta ya agarra:** formato, orden de imports,
   ancho de línea, tipos, locals sin usar.
@@ -169,31 +160,21 @@ Cada finding lleva una `confidence` interna, no impresa: `certain` (el hunk lo
 prueba mecánicamente), `likely` (lo sostiene con juicio), `speculative` (sin cita
 inequívoca). Solo decide la ubicación: `speculative` va al bucket compacto.
 
-## 6. Quote-check
+## 6. Conciliación y quote-check
 
-Para cada finding del paso 5 (no los del 3), antes de mostrar nada:
-
-1. Buscar el `file:line` citado en el diff cacheado. No está → descartar
-   (`cite-not-in-diff`).
-2. Leer 5–10 líneas alrededor. No contienen lo que el claim nombra → descartar
-   (`claim-not-supported`).
-3. No agregar ni re-puntuar nada: es un chequeo de citas, no una segunda review.
-
-Una línea arriba del reporte, aunque no descarte nada:
-`Quote-check: descarté 2 de 9 candidatos (1 cite-not-in-diff, 1 claim-not-supported).`
+`ld-review-reconcile` §2, en esta sesión: normaliza el reporte de ponytail, agrupa
+lo que los dos marcaron (`ambos`), corre el quote-check sobre la lista unida —
+la cita tiene que existir en HEAD; fuera del diff vale — y compara la intención
+contra el `**Goal:**` del plan. Los findings del paso 3 no pasan por el
+quote-check: citan por construcción.
 
 ## 7. Reporte y triage
 
 Un solo listado en el chat. Nada de archivos, comentarios en el PR ni commits.
-
-Encabezado, solo las filas que dispararon:
-
-```txt
-Gates:     no corridos — CI los gatea en cada build del branch.
-Fases:     <tabla del paso 2>
-Criterios: <resultado del paso 4>
-Menciones: <one-liners de los scans de mención obligatoria>
-```
+Título: `## Self-review · <id> · <branch> · <N> commits sobre <base>`. Encabezado,
+bloque Intención, entradas de findings y bucket: formato de `ld-review-reconcile`
+§3. Esta skill aporta las filas `Fases` (paso 2, `6/6 coinciden` o la tabla si no)
+y `Gates`, y el mapa de riesgo entre la intención y los findings.
 
 **Mapa de riesgo — dónde leer**, una línea por commit de fase, en tres niveles.
 Existe porque revisás una vez por tarea: es lo que hace que esa revisión gaste su
@@ -209,31 +190,8 @@ Dónde leer:
 Línea por línea: fases ⏸, commits con mención obligatoria y los que cita un 🔴.
 Con atención: lógica nueva fuera de eso. Pasada rápida: tests, docs, renames.
 
-Después los findings, más severos primero, numerados. **🔴 y 🟡, entrada completa:**
-
-````markdown
-### N. 🔴 <el claim en una línea>
-
-`file:line`
-
-```ts
-<el hunk más chico que lo prueba>
-```
-
-**Qué pasa.** <2-4 oraciones: el mecanismo, qué tiene que ser cierto para que
-dispare, si está vivo hoy o latente, y qué se verificó.>
-
-**Fix.** <qué hacer y su costo concreto — nunca "chico" o "fácil".> · **Si se deja:** <qué se acepta exactamente.>
-````
-
-**⚪ y `speculative`, bucket compacto**, una línea cada uno:
-
-```txt
-⚪ (7) — pedime el detalle por número si alguno te llama:
-  1. src/scans.controller.ts:44 — nombre inconsistente con el resto del módulo
-```
-
-Cerrar con:
+Después los findings, numerados, en el orden y el formato de `ld-review-reconcile`
+§3. Cerrar con:
 
 > Triage por número: `fix` · `drop` · `defer` (dejo un `ponytail:`) · `ticket`. Ej: `fix 1,3; defer 2; drop 4`.
 
@@ -249,9 +207,12 @@ El único paso que escribe, y solo sobre lo que marcaste.
 - **`drop`** → nada.
 - **`defer`** → un comentario `ponytail:` en el lugar del finding que nombra el
   techo y el camino de upgrade (`// ponytail: map en memoria, cache por cuenta si
-  supera una réplica`). Un defer sin techo nombrable es un `drop`: decirlo.
+supera una réplica`). Un defer sin techo nombrable es un `drop`: decirlo.
 - **`ticket`** → no crearlo: pasarlo como semilla al skill de tickets del adapter
   (o `ld-create-ticket`), que arma el draft y pregunta.
+
+Después, una línea por finding presentado en el log de calibración
+(`ld-review-reconcile` §4, `skill` = `self-review`, `ref` = la key o el slug).
 
 Cerrar con lo que se arregló (fixup → fase) y lo que queda con su razón. Cuando
 aprobás: `GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash $(git merge-base origin/<base> HEAD)`
@@ -261,11 +222,12 @@ y `git log --oneline origin/<base>..HEAD`. Siguiente: push (tuyo) → `/ld-ship-
 
 - **Nada en GitHub ni en el ticket.** No hay PR todavía.
 - **No arregla antes del triage.**
-- **No busca duplicados en el repo ni audita docs que el diff no tocó.**
-- **Un solo agente, nunca varios en paralelo.** El de los pasos 4–6 existe para
-  sacar el ancla de quien implementó. Repartir el diff entre varios no ahorra
-  trabajo, y rompe el quote-check, que solo vale cuando un mismo lector verifica
-  cada cita contra el mismo texto. Un diff demasiado grande se parte por área, no
-  por lente.
+- **No caza duplicados por todo el repo ni audita docs que el diff no tocó.** Que
+  el diff reinvente un helper existente sí se marca: lo ve ponytail, o el personal
+  si una regla del repo lo nombra.
+- **Dos agentes con lentes distintas, nunca más.** Un tercero no agrega
+  independencia y multiplica la conciliación. El quote-check corre una vez, en la
+  conciliación, porque solo vale cuando un mismo lector verifica cada cita contra
+  el mismo texto. Un diff demasiado grande se parte por área, no por lente.
 - **No resume la tarea.** Qué cambió y por qué va al body del PR, en ship.
 - **No pushea.** Los únicos commits son fixups de lo que marcaste `fix`.

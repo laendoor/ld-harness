@@ -49,6 +49,8 @@ ld-harness/
 │   ├── ld-sync/            ← política de sync del propio harness (notify-only)
 │   ├── ld-create-pr/       ← body con evidencia; templates de fallback en templates/
 │   ├── ld-code-review-pr/  ← review de un PR ajeno, una sola review en GitHub
+│   ├── ld-review-reconcile/ ← dos agentes (personal + ponytail-review), conciliación y
+│   │                         log de calibración; la cargan las dos reviews
 │   └── ld-create-ticket/ ld-review-fix/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)

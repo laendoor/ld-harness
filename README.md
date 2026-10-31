@@ -40,8 +40,9 @@ ld-harness/
 │   ├── ld-ship-task.md / ld-close-task.md
 │   ├── ld-adr.md / ld-create-pr.md / ld-define-ticket.md
 │   ├── ld-code-review-pr.md / ld-review-fix.md
-│   └── ld-improve-harness.md / ld-sync.md / ld-whats-next.md / ld-status.md
-│       / ld-deps-task.md
+│   ├── ld-improve-harness.md / ld-sync.md / ld-whats-next.md / ld-status.md
+│   │   / ld-deps-task.md
+│   └── ld-ops.md / ld-db.md / ld-research.md
 ├── skills/                 ← contratos completos (el agente los carga on-demand)
 │   ├── ld-adr/ / ld-improve-harness/ / ld-mem/
 │   ├── ld-workflow/        ← contrato start → implement → self-review → ship → close
@@ -55,6 +56,9 @@ ld-harness/
 │   ├── ld-define-ticket/  ← definir un ticket (nuevo o existente) hasta que no queden dudas
 │   ├── ld-status/          ← pantallazo: dónde estoy, qué sigue, qué está roto
 │   ├── ld-deps-task/       ← N PRs de Dependabot → un branch propio, verificado, sin mergear
+│   ├── ld-ops/             ← operar un entorno desplegado (genérico + adapter)
+│   ├── ld-db/              ← dumps, migraciones y restores (genérico + adapter)
+│   ├── ld-research/        ← responder con evidencia: repo, historia git o web
 │   └── ld-review-fix/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)

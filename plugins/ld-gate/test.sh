@@ -54,5 +54,12 @@ check block-catastrophic.sh   allow "$T/task" "docker compose up -d postgres"
 check block-catastrophic.sh   deny  "$T/task" "docker compose -f compose.yaml down -v"
 check block-catastrophic.sh   allow "$T/task" "docker run --rm -v /tmp/x:/x alpine true"
 check block-catastrophic.sh   deny  "$T/task" "pg_restore --clean -d academika dump.sql"
+check block-catastrophic.sh   allow "$T/task" "gh issue create --body 'documentar alembic downgrade'"
+check block-catastrophic.sh   allow "$T/task" "git commit -m 'revertir con alembic downgrade'"
+check block-catastrophic.sh   deny  "$T/task" 'gh issue create --body "$(dropdb academika)"'
+check block-catastrophic.sh   deny  "$T/task" "gh issue create --body x; rm -rf /"
+check block-catastrophic.sh   allow "$T/task" "cd /tmp && git commit -m 'revertir con alembic downgrade'"
+check block-catastrophic.sh   deny  "$T/task" "cd /tmp && git commit -m x && dropdb y"
+check block-catastrophic.sh   deny  "$T/task" $'git status\ndropdb x'
 
 [ "$fails" -eq 0 ] && echo "ld-gate: all checks pass" || exit 1

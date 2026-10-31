@@ -209,7 +209,7 @@ El único paso que escribe, y solo sobre lo que marcaste.
   techo y el camino de upgrade (`// ponytail: map en memoria, cache por cuenta si
 supera una réplica`). Un defer sin techo nombrable es un `drop`: decirlo.
 - **`ticket`** → no crearlo: pasarlo como semilla al skill de tickets del adapter
-  (o `ld-create-ticket`), que arma el draft y pregunta.
+  (o `ld-define-ticket`), que arma el draft y pregunta.
 
 Después, una línea por finding presentado en el log de calibración
 (`ld-review-reconcile` §4, `skill` = `self-review`, `ref` = la key o el slug).

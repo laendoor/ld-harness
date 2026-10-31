@@ -38,9 +38,9 @@ ld-harness/
 ├── commands/               ← entry points /ld-* (visibles en autocompletado)
 │   ├── ld-start-task.md / ld-implement-task.md / ld-self-review.md
 │   ├── ld-ship-task.md / ld-close-task.md
-│   ├── ld-adr.md / ld-create-pr.md / ld-create-ticket.md
+│   ├── ld-adr.md / ld-create-pr.md / ld-define-ticket.md
 │   ├── ld-code-review-pr.md / ld-review-fix.md
-│   └── ld-improve-harness.md / ld-sync.md / ld-whats-next.md
+│   └── ld-improve-harness.md / ld-sync.md / ld-whats-next.md / ld-status.md
 ├── skills/                 ← contratos completos (el agente los carga on-demand)
 │   ├── ld-adr/ / ld-improve-harness/ / ld-mem/
 │   ├── ld-workflow/        ← contrato start → implement → self-review → ship → close
@@ -51,7 +51,9 @@ ld-harness/
 │   ├── ld-code-review-pr/  ← review de un PR ajeno, una sola review en GitHub
 │   ├── ld-review-reconcile/ ← dos agentes (personal + ponytail-review), conciliación y
 │   │                         log de calibración; la cargan las dos reviews
-│   └── ld-create-ticket/ ld-review-fix/ ld-whats-next/
+│   ├── ld-define-ticket/  ← definir un ticket (nuevo o existente) hasta que no queden dudas
+│   ├── ld-status/          ← pantallazo: dónde estoy, qué sigue, qué está roto
+│   └── ld-review-fix/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)
 │   ├── ld-gate/            ← enforcement determinístico: sin push, sin commit en main,

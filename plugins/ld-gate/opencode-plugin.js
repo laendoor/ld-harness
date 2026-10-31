@@ -17,7 +17,19 @@ const CATASTROPHIC = [
 	/\bmkfs(\.|$|\s)/, // mkfs.*
 	/: ?\(\) ?\{ ?: ?\| ?: ?& ?\} ?;/, // fork bomb
 	/> ?\/dev\/sd[a-z]\b/, // overwrite de disco
+	/\balembic[-\s]+downgrade\b/i, // `downgrade base` dropea todas las tablas
+	/\bdropdb\b/i, // binario dropdb
+	/\bpg_restore[^\n]*--clean\b/i, // restauración que dropea antes de crear
+	/\bdocker\s+volume\s+rm\b/i, // se lleva el volumen de postgres
+	/\bdocker[^\n]*\bdown\b[^\n]*(\s-[a-z]*v[a-z]*|--volumes)\b/i, // docker compose down -v
 ]
+
+// SQL destructivo sólo importa si el comando habla con la base: así `grep truncate`
+// y una commit message que lo nombre pasan, y el heredoc —que trae el cliente y la
+// sentencia en líneas distintas— queda cubierto.
+const SQL_CLIENT = /\b(psql|dropdb|pg_restore|pg_dumpall|alembic[-\s])\b/i
+const DESTRUCTIVE_SQL =
+	/\b(truncate|delete\s+from|drop\s+(database|schema|table|extension|column))\b/i
 
 function blockedCommand(input) {
 	// ponytail: solo bash en v0; edit/write se gatean por permiso + perfil
@@ -27,6 +39,9 @@ function blockedCommand(input) {
 		if (re.test(cmd)) {
 			return `[ld-gate] comando bloqueado por patrón catastrófico ${re}: ${cmd.slice(0, 120)}`
 		}
+	}
+	if (SQL_CLIENT.test(cmd) && DESTRUCTIVE_SQL.test(cmd)) {
+		return `[ld-gate] operación SQL destructiva (cliente + sentencia): ${cmd.slice(0, 120)}`
 	}
 	return undefined
 }

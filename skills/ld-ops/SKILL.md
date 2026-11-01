@@ -19,7 +19,7 @@ inventes ni lo busques a ciegas — pedilo.
 
 **Dónde está.** `<repo>/ops/adapter.md` si el proyecto es un repo. Si es cross-proyecto
 —un host que sirve a varios repos— es definición de usuario:
-`~/.config/opencode/adapters/<tipo>-<nombre>.md` (ej. `droplet-12-cactus.md`). El prefijo
+`~/.config/ld-harness/adapters/<tipo>-<nombre>.md` (ej. `droplet-12-cactus.md`). El prefijo
 dice qué clase de entorno es, no qué proyecto lo usa.
 
 **Supuesto de herramienta.** Los ejemplos usan docker/compose y curl porque es lo que hay

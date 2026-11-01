@@ -18,7 +18,7 @@ revierte y se reporta. No hay "un UPDATE rapidito".
 
 **Dónde está.** `<repo>/ops/adapter.md` si el proyecto es un repo. Si la base es
 cross-proyecto —un host que sirve a varios repos— es definición de usuario:
-`~/.config/opencode/adapters/<tipo>-<nombre>.md` (ej. `droplet-academika.md`).
+`~/.config/ld-harness/adapters/<tipo>-<nombre>.md` (ej. `droplet-academika.md`).
 
 **Supuesto de herramienta.** Los ejemplos usan postgres/psql y `pg_dump`/`pg_restore`. Si
 el motor es otro, lo declara el adapter y los comandos se traducen — lo que no cambia son

@@ -18,7 +18,7 @@ manifests                install, fallout        por uno                        
 
 ## 1. Descubrir
 
-Dos fuentes, la primera manda.
+Tres fuentes. Las alertas mandan sobre los bumps.
 
 **PRs abiertos de Dependabot:**
 
@@ -43,6 +43,24 @@ escribir en ningún manifest. Se resuelve pidiéndole el paquete al resolver
 La versión resultante puede quedar más nueva que la que propone Dependabot: manda
 el índice, no el PR, y el body del nuestro lo dice.
 
+**Alertas de seguridad abiertas.** Dependabot no abre PR para todas, y una CVE
+no espera a la próxima ronda:
+
+```bash
+gh api "repos/<owner>/<repo>/dependabot/alerts?state=open&per_page=100" \
+  --jq '.[] | "\(.security_advisory.severity)\t\(.dependency.package.name)\t\(.dependency.manifest_path)\t\(.security_vulnerability.first_patched_version.identifier // "sin fix")"'
+```
+
+Cada alerta trae la versión que la arregla. Cruzarla con lo que deja el bump: si
+el bump ya alcanza `first_patched_version`, la alerta se cierra con este PR y se
+anota así en el plan — es el mejor argumento que va a tener el body. Si no lo
+alcanza, el paquete entra aunque no tenga PR de Dependabot: una alerta abierta
+pesa más que un bump de versión.
+
+Las alertas son del branch default, así que reflejan `main` y no el branch de
+trabajo. Al cerrar hay que volver a consultarlas: las que no se resolvieron
+siguen ahí y son lo que queda registrado.
+
 **Otros updates que valga la pena sugerir:** `npm outdated` por cada
 `package.json` con lockfile, `uv pip list --outdated` si hay `uv.lock`, y las
 imágenes base si el repo las pinnea. **Se sugieren, no se incluyen**: van
@@ -50,12 +68,20 @@ listados aparte y entran solo si los pedís.
 
 ## 2. Plan
 
-Plan de `ld-workflow` §1 más dos secciones propias:
+Plan de `ld-workflow` §1 más las secciones propias:
 
 ```markdown
 ## PRs absorbidos
 
 - #127 python 3.13 → 3.15 (Dockerfile)
+
+## Alertas cerradas
+
+- certifi 2026.10.23 ≥ 2026.10.18 (crítica)
+
+## Alertas abiertas
+
+- ninguna
 
 ## Diferido
 
@@ -64,7 +90,7 @@ Plan de `ld-workflow` §1 más dos secciones propias:
 
 Al proponer, separar en tres baldes:
 
-- **Entra** — bumps de librería y de actions.
+- **Entra** — bumps de librería y de actions, más todo paquete con alerta abierta.
 - **Decisión tuya** — cambios de runtime: imagen base, `engines`,
   `requires-python`, versión de lenguaje en CI. Un major de runtime cambia lo
   que corre en prod y no lo valida ningún test de unidad. Nunca entra solo.
@@ -102,7 +128,9 @@ Frenar acá. Sin OK sobre el plan no se escribe código.
 2. **Frenar para tu review del diff** (difit si lo pedís).
 3. **El push es tuyo.** Mostrar `git push -u origin <branch>` y frenar.
 4. **PR** con `ld-create-pr`. El body lista **los PRs absorbidos uno por uno**
-   (`#127, #128, …`): un rango `#127–#144` linkea 127 y 144 y nada más.
+   (`#127, #128, …`): un rango `#127–#144` linkea 127 y 144 y nada más. Si el
+   branch cierra alertas, decir cuántas y de qué severidad — es lo que más le
+   importa a quien revisa.
 5. Esperar el CI y reportar. Verde → hand-off. **No mergear.**
 
 ## 5. Cierre

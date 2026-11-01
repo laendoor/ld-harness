@@ -143,8 +143,13 @@ Si el body usó los keywords, el merge ya cerró los PRs absorbidos. Lo que qued
 para el comando de close del proyecto (`ld-close-task` o su adapter) son los que
 no cerraron —porque el keyword faltó, porque el PR apuntaba a otro branch, o
 porque Dependabot todavía no recalculó— y el registro de lo que quedó: lee del
-plan `## PRs absorbidos` y `## Diferido`. Qué hace con eso —status, bitácora,
-branch, memoria— lo define cada proyecto: acá no se asume.
+plan `## PRs absorbidos` y `## Diferido`.
+
+**El cierre de una tarea de deps es liviano: branch, plan, memoria.** No escribe
+la bitácora ni el status del proyecto — esos slots son para tareas de la app,
+donde hay algo que contarle a alguien. Acá lo que hay para contar ya está en el
+PR y en el plan. Qué más hace cada proyecto con el cierre lo define su adapter;
+lo que no corresponde heredar es el registro narrativo.
 
 ## 6. Rojo en Dependabot
 

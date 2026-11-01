@@ -45,8 +45,8 @@ lo que baja el riesgo hoy, después lo que requiere diseño.
 **D6 · El adapter es del proyecto, nunca del playbook.** Dos playbooks sobre el mismo
 entorno comparten host y credenciales; con un adapter por playbook el dato se duplica y
 divergen. Ubicación: `<repo>/ops/adapter.md` si el proyecto es un repo;
-`~/.config/opencode/adapters/<tipo>-<nombre>.md` si es cross-proyecto (un host que sirve a
-varios repos). El prefijo nombra la clase de entorno (`droplet-`), no el proyecto. El
+`~/.config/ld-harness/adapters/<tipo>-<nombre>.md` si es cross-proyecto (un host que sirve
+a varios repos). El prefijo nombra la clase de entorno (`droplet-`), no el proyecto. El
 adapter absorbe desviaciones en vez de forzar convenciones: si el runbook vive en la raíz
 del repo, lo declara.
 
@@ -65,6 +65,28 @@ de misfires.
 **Nota operativa:** opencode ignora frontmatter desconocido, así que `allowed-tools` en un
 skill **no restringe nada**. El límite real es `permission.bash` (el gate) y
 `permission.skill`.
+
+**D8 · Config de usuario en `~/.config/ld-harness/`, no en el directorio de opencode.** Esa
+ruta es de opencode, no nuestra: los adapters ya la estaban ensuciando y Claude Code no la
+lee. Tres niveles con dueño distinto:
+
+| nivel                             | dueño                   | contiene                           |
+| --------------------------------- | ----------------------- | ---------------------------------- |
+| `<repo del harness>`              | el proyecto, versionado | el mecanismo: `config.example.env` |
+| `~/.config/ld-harness/config.env` | el usuario, por máquina | sus valores                        |
+| `<repo>/.ld-harness.env`          | el proyecto             | override, solo lo que difiere      |
+
+Formato **dotenv**, no YAML: los dos consumidores son node y bash, y YAML obliga a un
+parser en ambos. Precedencia: default del código < usuario < proyecto. `setup.sh` crea el
+archivo desde el example solo si falta, así una PC nueva queda andando sin leer nada.
+
+`setup.sh` acepta `HARNESS=` para clonar en otra ruta y así poder probarlo contra un `HOME`
+falso.
+
+**Claves de prosa.** `LD_PROSA_CHAT` (locale), `LD_PROSA_ARTIFACTS` (idioma de PRs, tickets
+y docs) y `LD_PROSA_REGISTER`. **El voseo no es una clave: se infiere de `es-AR`.** Y el
+**código no se configura** — identificadores y comentarios van siempre en inglés; es la
+única capa con un valor único. Tres superficies de lenguaje, tres dueños distintos.
 
 ## Mapa
 
@@ -202,3 +224,7 @@ cambia lo que el agente hace, no entra.
 1. ¿B1 tiene muestra suficiente en engram, o hay que capturar dos semanas antes?
 2. ¿La confianza 1..5 se usa como probabilidad o solo como "sé / creo / adivino"?
 3. ¿El disparo del PR es `ld-ship-task` o `ld-start-task`?
+4. **Colisión de nombres:** el README ya llama "adapter" a los comandos por proyecto
+   (`aika-*`, `fini-*`, `gr-*`). Los de entorno (`droplet-12-cactus.md`) son otra cosa con
+   el mismo nombre. Opciones: renombrar estos a _environment profile_ en
+   `entornos/`, o dejar "adapter" para los dos y distinguir por contexto.

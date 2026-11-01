@@ -270,6 +270,7 @@ con estos slots. Lo que no esté definido acá usa el default del contrato.
 | `ticket.fetch`                                   | De dónde sale la tarea y cómo leerla                           | GitHub issue (`gh issue view`) o el prompt                 |
 | `ticket.ref`                                     | Cómo el PR referencia al ticket                                | `Closes #N` si hay issue; si no, nada                      |
 | `ticket.start` / `ticket.review` / `ticket.done` | Transiciones del ticket; start también lo asigna a quien corre | Ninguna                                                    |
+| `pr.labels`                                      | Etiquetas del PR, por ecosistema o por área                    | Ninguna                                                    |
 | `branch.name`                                    | Nombre y estrategia del branch                                 | `<feat\|fix\|task>/<id>-<slug>` desde `origin/<base>` (§1) |
 | `plan.path`                                      | Dónde vive el plan                                             | `.tmp/tasks/<id>/plan.md`                                  |
 | `context`                                        | Qué leer además del código                                     | `CLAUDE.md` / `AGENTS.md` del repo                         |

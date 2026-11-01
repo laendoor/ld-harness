@@ -68,25 +68,25 @@ In descending order of value, because the first two carry reasoning and the last
 3. **The commit subjects** — the shape of the work, and the type for the title.
 4. **The diff** — last, and only to check the claims. Reading it first is what produces a changelog.
 
-**Name the source of each section in the draft** (`from the plan, decision 4`, `from the diff — unverified`). The user is reviewing whether the body is *true*, and they can only do that if they can see which sentences are grounded and which are your reading.
+**Name the source of each section in the draft** (`from the plan, decision 4`, `from the diff — unverified`). The user is reviewing whether the body is _true_, and they can only do that if they can see which sentences are grounded and which are your reading.
 
 ### 5. Fill the sections
 
 Each heading in the template maps to an instruction. The template's own HTML comment is the short form for a human; this is the long form:
 
-| Heading | What has to be true of it |
-|---|---|
-| **Opening line** | One or two sentences, standalone: a reader who never opens the diff still knows what changed and why. Ticket link on this line. |
-| **The problem** | The problem that motivated the work, in evidence — real numbers from a real run, real output, a `path:line`. Any claim of an improvement carries the numbers that back it (the kernel rule). **No evidence, no section.** |
-| **What changed, and why this approach** | The approach, plus the alternative that was rejected and the reason it lost. A reviewer who disagrees should find their objection already answered. |
-| **Accepted cost** | Where the approach falls short, or what got worse. Omit only when nothing got worse — and check twice before believing that. |
-| **What reviewers should know** | Where the risk is, and anything in the diff that reads as a mistake without context: deleted tests, a behaviour change for existing callers, scope that grew past the ticket. **State the growth explicitly** — scope a reviewer discovers is scope they distrust. |
-| **How to verify** | Commands runnable verbatim with their expected results. "Run the tests" is not verification; a command with the numbers it should print is. |
-| **Out of scope, on purpose** | What was deliberately not done, so review does not reopen it. |
-| **What was broken** *(bug)* | The reproduction verbatim, then expected vs actual with the real output. |
-| **Root cause** *(bug)* | The mechanism at `path:line`. Unconfirmed causes are labelled unconfirmed — a guess presented as a diagnosis sends the review the wrong way. |
-| **The fix** *(bug)* | What changed, and why at this layer rather than another one where it would also have worked. That choice is the part of a bug fix reviewers most often disagree with. |
-| **Why it will not come back** *(bug)* | The regression test and what it asserts. A fix whose test does not fail without it is a fix nobody can defend later. |
+| Heading                                 | What has to be true of it                                                                                                                                                                                                                                          |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Opening line**                        | One or two sentences, standalone: a reader who never opens the diff still knows what changed and why. Ticket link on this line.                                                                                                                                    |
+| **The problem**                         | The problem that motivated the work, in evidence — real numbers from a real run, real output, a `path:line`. Any claim of an improvement carries the numbers that back it (the kernel rule). **No evidence, no section.**                                          |
+| **What changed, and why this approach** | The approach, plus the alternative that was rejected and the reason it lost. A reviewer who disagrees should find their objection already answered.                                                                                                                |
+| **Accepted cost**                       | Where the approach falls short, or what got worse. Omit only when nothing got worse — and check twice before believing that.                                                                                                                                       |
+| **What reviewers should know**          | Where the risk is, and anything in the diff that reads as a mistake without context: deleted tests, a behaviour change for existing callers, scope that grew past the ticket. **State the growth explicitly** — scope a reviewer discovers is scope they distrust. |
+| **How to verify**                       | Commands runnable verbatim with their expected results. "Run the tests" is not verification; a command with the numbers it should print is.                                                                                                                        |
+| **Out of scope, on purpose**            | What was deliberately not done, so review does not reopen it.                                                                                                                                                                                                      |
+| **What was broken** _(bug)_             | The reproduction verbatim, then expected vs actual with the real output.                                                                                                                                                                                           |
+| **Root cause** _(bug)_                  | The mechanism at `path:line`. Unconfirmed causes are labelled unconfirmed — a guess presented as a diagnosis sends the review the wrong way.                                                                                                                       |
+| **The fix** _(bug)_                     | What changed, and why at this layer rather than another one where it would also have worked. That choice is the part of a bug fix reviewers most often disagree with.                                                                                              |
+| **Why it will not come back** _(bug)_   | The regression test and what it asserts. A fix whose test does not fail without it is a fix nobody can defend later.                                                                                                                                               |
 
 **A heading this table does not know gets filled from its own name and its HTML comment.** The repo's template wins over this skill: someone adding a section there must not have to edit a global skill for it to be filled.
 
@@ -114,7 +114,7 @@ State the type and scope you chose in the draft, since it is a judgment call on 
 
 Print the full draft — title, template chosen and why, the gate results, `Net:`, the body, and any section deliberately omitted with the reason. Wait for approval.
 
-The `gh` call may also be gated by a permission prompt, but that prompt only asks whether to run a command; it cannot show whether the body is *right*. This step is what makes the approval mean something.
+The `gh` call may also be gated by a permission prompt, but that prompt only asks whether to run a command; it cannot show whether the body is _right_. This step is what makes the approval mean something.
 
 ```bash
 gh pr create --base <base> --title "<title>" --body-file <file>
@@ -138,6 +138,8 @@ https://github.com/<org>/<repo>/pull/33
 ## What this skill does not do
 
 - **Nothing in the ticket.** No comment, no transition. Touching one system keeps it safe to invoke on its own; the ticket side is the ship stage (`/ld-ship-task` or the project's adapter).
-- **No reviewers, no assignees, no labels** unless the user asks for them by name.
+- **No reviewers, no assignees.** Labels salen del slot `pr.labels` del
+  adapter; sin adapter, ninguna. Un repo que etiqueta sus PRs por ecosistema ya
+  tiene la etiqueta escrita — inventar una nueva es peor que no poner ninguna.
 - **No merging, and no chasing CI.** The PR is opened and handed back.
 - **No commits, no push.** A dirty tree or an unpushed branch stops step 2 and gets reported.

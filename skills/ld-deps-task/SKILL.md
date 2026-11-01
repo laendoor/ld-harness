@@ -130,8 +130,9 @@ Frenar acá. Sin OK sobre el plan no se escribe código.
 4. **PR** con `ld-create-pr`. El body lista **los PRs absorbidos uno por uno**
    (`#127, #128, …`): un rango `#127–#144` linkea 127 y 144 y nada más. Si el
    branch cierra alertas, decir cuántas y de qué severidad — es lo que más le
-   importa a quien revisa.
-5. Esperar el CI y reportar. Verde → hand-off. **No mergear.**
+   importa a quien revisa. Las etiquetas del ecosistema salen del slot
+   `pr.labels`; sin adapter, las que el repo ya use para sus PRs de Dependabot.
+5. Hand-off: el link y frenar. El CI lo mira quien mergea. **No mergear.**
 
 ## 5. Cierre
 

@@ -41,6 +41,7 @@ ld-harness/
 │   ├── ld-adr.md / ld-create-pr.md / ld-define-ticket.md
 │   ├── ld-code-review-pr.md / ld-review-fix.md
 │   └── ld-improve-harness.md / ld-sync.md / ld-whats-next.md / ld-status.md
+│       / ld-deps-task.md
 ├── skills/                 ← contratos completos (el agente los carga on-demand)
 │   ├── ld-adr/ / ld-improve-harness/ / ld-mem/
 │   ├── ld-workflow/        ← contrato start → implement → self-review → ship → close
@@ -53,6 +54,7 @@ ld-harness/
 │   │                         log de calibración; la cargan las dos reviews
 │   ├── ld-define-ticket/  ← definir un ticket (nuevo o existente) hasta que no queden dudas
 │   ├── ld-status/          ← pantallazo: dónde estoy, qué sigue, qué está roto
+│   ├── ld-deps-task/       ← N PRs de Dependabot → un branch propio, verificado, sin mergear
 │   └── ld-review-fix/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)

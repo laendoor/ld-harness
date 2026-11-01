@@ -247,8 +247,8 @@ cierra, recién ahí pedirla en una línea.
    `git switch --detach origin/<base>`, porque `-d` solo borra lo mergeado en HEAD),
    borrar el directorio de la tarea
    (`.tmp/tasks/<id>/`) y lo que agregue el slot `close.cleanup`.
-4. `## Pendiente de sync` del plan: mostrarlo antes de borrar el plan, para que no
-   se pierda con él.
+4. `## Pendiente de sync` y `## Diferido` del plan: mostrarlos antes de borrar
+   el plan, para que no se pierdan con él.
 5. `mem_session_summary`.
 
 ## 9. Contrato del adapter

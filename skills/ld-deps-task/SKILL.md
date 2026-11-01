@@ -127,19 +127,23 @@ Frenar acá. Sin OK sobre el plan no se escribe código.
    grande.
 2. **Frenar para tu review del diff** (difit si lo pedís).
 3. **El push es tuyo.** Mostrar `git push -u origin <branch>` y frenar.
-4. **PR** con `ld-create-pr`. El body lista **los PRs absorbidos uno por uno**
-   (`#127, #128, …`): un rango `#127–#144` linkea 127 y 144 y nada más. Si el
-   branch cierra alertas, decir cuántas y de qué severidad — es lo que más le
-   importa a quien revisa. Las etiquetas del ecosistema salen del slot
+4. **PR** con `ld-create-pr`. El body cierra los PRs absorbidos **con el keyword
+   de GitHub, uno por uno**: `Closes #127, closes #128, closes #129`. Nombrarlos
+   no alcanza — `Absorb #127` no es un keyword y no linkea ni cierra nada, y un
+   rango `#127–#144` linkea 127 y 144 y nada más. El keyword solo actúa si el PR
+   apunta al branch default, que es el caso acá.
+   Si el branch cierra alertas, decir cuántas y de qué severidad — es lo que más
+   le importa a quien revisa. Las etiquetas del ecosistema salen del slot
    `pr.labels`; sin adapter, las que el repo ya use para sus PRs de Dependabot.
 5. Hand-off: el link y frenar. El CI lo mira quien mergea. **No mergear.**
 
 ## 5. Cierre
 
-GitHub no cierra un PR por referencia cruzada. El cierre lo corre el comando de
-close del proyecto (`ld-close-task` o su adapter), que lee del plan
-`## PRs absorbidos` para cerrarlos con un comentario que apunte al mergeado, y
-`## Diferido` para registrar lo que queda. Qué hace con eso —status, bitácora,
+Si el body usó los keywords, el merge ya cerró los PRs absorbidos. Lo que queda
+para el comando de close del proyecto (`ld-close-task` o su adapter) son los que
+no cerraron —porque el keyword faltó, porque el PR apuntaba a otro branch, o
+porque Dependabot todavía no recalculó— y el registro de lo que quedó: lee del
+plan `## PRs absorbidos` y `## Diferido`. Qué hace con eso —status, bitácora,
 branch, memoria— lo define cada proyecto: acá no se asume.
 
 ## 6. Rojo en Dependabot

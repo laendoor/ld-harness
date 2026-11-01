@@ -26,14 +26,22 @@ Dos fuentes, la primera manda.
 gh pr list --state open --author app/dependabot --json number,title,headRefName
 ```
 
-Por cada uno, **solo el diff de los manifests**:
+Por cada uno, primero **qué archivos toca**, después **solo el diff de los
+manifests**:
 
 ```bash
+gh pr diff <n> --name-only
 gh pr diff <n> -- package.json pyproject.toml Dockerfile '*.yml' '*.yaml' '*.toml' '*.json'
 ```
 
-Nada de logs de CI, nada de bodies, nada de lockfiles. El lockfile lo regenera
-el install; el CI ajeno no dice nada útil de entrada (§6).
+Nada de logs de CI, nada de bodies, nada del contenido de los lockfiles. El
+lockfile lo regenera el install; el CI ajeno no dice nada útil de entrada (§6).
+
+Si el único archivo es un lockfile, el bump es **transitivo**: no hay versión que
+escribir en ningún manifest. Se resuelve pidiéndole el paquete al resolver
+—`npm update <pkg>`, `uv lock --upgrade-package <pkg>`— y el lockfile sale solo.
+La versión resultante puede quedar más nueva que la que propone Dependabot: manda
+el índice, no el PR, y el body del nuestro lo dice.
 
 **Otros updates que valga la pena sugerir:** `npm outdated` por cada
 `package.json` con lockfile, `uv pip list --outdated` si hay `uv.lock`, y las

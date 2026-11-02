@@ -88,6 +88,34 @@ y docs) y `LD_PROSA_REGISTER`. **El voseo no es una clave: se infiere de `es-AR`
 **código no se configura** — identificadores y comentarios van siempre en inglés; es la
 única capa con un valor único. Tres superficies de lenguaje, tres dueños distintos.
 
+**D9 · Los adapters de proyecto se reemplazan por un perfil. Diferido.** Los `aika-*` y
+`gr-*` son el mismo procedimiento con constantes distintas: se borran y los `ld-*` se
+disparan directo. Pero **no todo lo con prefijo de proyecto es un adapter**:
+
+|                                               | qué es                                | destino        |
+| --------------------------------------------- | ------------------------------------- | -------------- |
+| `aika-start-task`, `gr-implement`             | mismas etapas, otras constantes       | muere → perfil |
+| `fini-adr`, `fini-status`                     | alias de un `ld-*` existente          | muere → nada   |
+| `fini-bitacora`, `fini-reunion`, `fini-latex` | procedimiento que el harness no cubre | **sobrevive**  |
+
+Triage: si al quitarle los valores queda una etapa de `ld-workflow`, es adapter. Si queda
+un procedimiento que el harness no tiene, es comando local.
+
+Formato: `<repo>/.ld-harness.md` con **frontmatter para escalares** (tracker, ref del
+ticket, canal de aviso, entorno) y **cuerpo para prosa** (contexto, paths críticos, cómo se
+verifica). Los entornos que sirven a varios repos quedan en
+`~/.config/ld-harness/environments/`. Se resuelve por `git rev-parse --show-toplevel`, nunca
+por cwd. Sin script resolutor mientras el único consumidor máquina sea el hook de prosa.
+
+Orden obligatorio: **perfiles escritos primero, borrado después.** Al revés se pierde el
+conocimiento, porque los adapters son hoy el único lugar donde están esas constantes.
+
+Por qué está diferido y no abortado: los adapters viven en los repos de proyecto
+(`academika/.opencode/commands/`, `proyecto-finisterre/.opencode/commands/`), no en el
+harness — en `ld-harness/commands/` hay cero. El riesgo no es borrarlos: es reescribir
+`ld-workflow` §9 antes de que existan los perfiles, porque §9 alimenta las sesiones de esos
+repos desde `main`.
+
 ## Mapa
 
 ```txt
@@ -186,30 +214,50 @@ cambia lo que el agente hace, no entra.
 
 ## Backlog
 
-| id  | qué                                | produce                                    | estado       | depende de       |
-| --- | ---------------------------------- | ------------------------------------------ | ------------ | ---------------- |
-| A1  | Contrato de rol                    | definición de qué compone un modo          | cerrado (D1) | —                |
-| A2  | Contrato de procedimiento          | formato de playbook + uno de muestra       | pendiente    | A1               |
-| B1  | Inventario de tareas reales        | clase → frecuencia → ¿duele?               | hecho 31/10  | —                |
-| B2  | Catálogo de playbooks              | 5-7 playbooks con criterio de salida       | pendiente    | B1, A2           |
-| A3  | Spec del router                    | batería de preguntas + política + fallback | pendiente    | B2               |
-| C1  | Jev vs clasificador in-context     | comparación medida                         | pendiente    | A3               |
-| C2  | Prototipo medido                   | acierto sobre 30 tareas reales             | pendiente    | C1               |
-| B3  | Matriz de cobertura de skills      | paso → skill existente / crear / borrar    | pendiente    | B2               |
-| E1  | Auditoría de duplicación de hechos | dónde se dice lo mismo N veces             | pendiente    | —                |
-| E2  | Fuente canónica por tipo de hecho  | regla + punteros de una línea              | pendiente    | E1, D3           |
-| E4  | Formato de commit con el porqué    | sección en la plantilla de commit          | pendiente    | D3               |
-| E3  | Mapa de lectura por repo           | archivo + check de paths                   | pendiente    | E2               |
-| C3  | Spec de `ld-self-eval`             | preguntas, scoring, registro del veredicto | pendiente    | —                |
-| C4  | Implementación de `ld-self-eval`   | skill + command                            | pendiente    | C3, B2           |
-| D1  | Diff `ld-prosa` vs `unslop`        | tabla de reglas con veredicto              | pendiente    | —                |
-| D2  | Nueva `ld-prosa`                   | archivo + 5 pares antes/después            | pendiente    | D1               |
-| P1  | Playbook `ld-ops`                  | skill + command, genérico con adapter      | hecho 31/10  | —                |
-| P2  | Playbook `ld-db`                   | skill + command, genérico con adapter      | hecho 31/10  | P1               |
-| P3  | Playbook `ld-research`             | skill + command, sin adapter               | hecho 31/10  | P2               |
-| P4  | Adapters `droplet-*`               | 12-cactus y academika, nivel usuario       | hecho 31/10  | P1, P2           |
-| P5  | `ld-gate`: texto vs ejecución      | patrones de prosa no bloquean gh/git       | hecho 31/10  | —                |
-| F   | Implementación por slices          | ramas chicas, una por cambio               | pendiente    | todo lo anterior |
+**Hecho**
+
+| id  | qué                             | produce                                  | fecha |
+| --- | ------------------------------- | ---------------------------------------- | ----- |
+| A1  | Contrato de rol                 | cerrado en D1                            | 31/10 |
+| A2  | Contrato de procedimiento       | 5 de núcleo + 3 opcionales, 3 instancias | 01/11 |
+| B1  | Inventario de tareas reales     | clase → frecuencia → ¿duele?             | 31/10 |
+| D1  | Análisis `ld-prosa` vs `unslop` | paper + los tres textos + veredicto      | 01/11 |
+| P1  | Playbook `ld-ops`               | skill + command, genérico con adapter    | 31/10 |
+| P2  | Playbook `ld-db`                | skill + command, genérico con adapter    | 31/10 |
+| P3  | Playbook `ld-research`          | skill + command, sin adapter             | 31/10 |
+| P4  | Entornos `droplet-*`            | 12-cactus y academika                    | 31/10 |
+| P5  | `ld-gate`: texto vs ejecución   | patrones de prosa no bloquean gh/git     | 31/10 |
+| P6  | Config de usuario               | `config.env` de tres niveles + setup     | 01/11 |
+
+**Listo para escribir, sin dependencias**
+
+| id  | qué             | produce                                            |
+| --- | --------------- | -------------------------------------------------- |
+| P7  | `ld-prosa` v0.5 | núcleo de ~100 líneas + referencias es/en/posturas |
+
+**Definición pendiente**
+
+| id  | qué                                | produce                                    | depende de |
+| --- | ---------------------------------- | ------------------------------------------ | ---------- |
+| E1  | Auditoría de duplicación de hechos | dónde se dice lo mismo N veces             | —          |
+| E2  | Fuente canónica por tipo de hecho  | regla + punteros de una línea              | E1         |
+| E3  | Mapa de lectura por repo           | archivo + check de paths                   | E2         |
+| E4  | Formato de commit con el porqué    | en uso en esta rama; falta formalizar      | D3         |
+| B2  | Catálogo de playbooks              | auditar 6 existentes, no diseñar 7         | B1, A2     |
+| B3  | Matriz de cobertura de skills      | paso → skill existente / crear / borrar    | B2         |
+| C3  | Spec de `ld-self-eval`             | preguntas, scoring, registro del veredicto | —          |
+| C4  | Implementación de `ld-self-eval`   | skill + command                            | C3, B2     |
+| A3  | Spec del router                    | batería + política + fallback              | B2         |
+| C1  | Jev vs clasificador in-context     | comparación medida                         | A3         |
+| C2  | Prototipo medido                   | acierto sobre 30 tareas reales             | C1         |
+
+**Diferido con motivo**
+
+| id  | qué                             | por qué espera                                                                |
+| --- | ------------------------------- | ----------------------------------------------------------------------------- |
+| D9  | Adapters → perfiles de proyecto | toca 3+ repos y `ld-workflow` §9; §9 corre desde `main` en las otras sesiones |
+| P8  | Formato del perfil              | solo hace falta cuando arranque D9                                            |
+| F   | Implementación por slices       | todo lo anterior                                                              |
 
 ## No objetivos
 

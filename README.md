@@ -40,8 +40,9 @@ ld-harness/
 │   ├── ld-ship-task.md / ld-close-task.md
 │   ├── ld-adr.md / ld-create-pr.md / ld-define-ticket.md
 │   ├── ld-code-review-pr.md / ld-review-fix.md
-│   └── ld-improve-harness.md / ld-sync.md / ld-whats-next.md / ld-status.md
-│       / ld-deps-task.md
+│   ├── ld-improve-harness.md / ld-sync.md / ld-whats-next.md / ld-status.md
+│   │   / ld-deps-task.md
+│   └── ld-ops.md / ld-db.md / ld-research.md
 ├── skills/                 ← contratos completos (el agente los carga on-demand)
 │   ├── ld-adr/ / ld-improve-harness/ / ld-mem/
 │   ├── ld-workflow/        ← contrato start → implement → self-review → ship → close
@@ -55,6 +56,9 @@ ld-harness/
 │   ├── ld-define-ticket/  ← definir un ticket (nuevo o existente) hasta que no queden dudas
 │   ├── ld-status/          ← pantallazo: dónde estoy, qué sigue, qué está roto
 │   ├── ld-deps-task/       ← N PRs de Dependabot → un branch propio, verificado, sin mergear
+│   ├── ld-ops/             ← operar un entorno desplegado (genérico + adapter)
+│   ├── ld-db/              ← dumps, migraciones y restores (genérico + adapter)
+│   ├── ld-research/        ← responder con evidencia: repo, historia git o web
 │   └── ld-review-fix/ ld-whats-next/
 ├── plugins/
 │   ├── ld-prosa/           ← estilo de comunicación (always-on)
@@ -64,6 +68,7 @@ ld-harness/
 │                             repos con config de formato propia (biome, prettier,
 │                             dprint, editorconfig); cada proyecto puede pisarlo
 │                             con `formatter` propio (`bash plugins/ld-format/test.sh`)
+├── config.example.env      ← claves de usuario; el setup lo copia a ~/.config/ld-harness/
 ├── setup.sh                ← instalación idempotente en PC nueva
 └── .claude-plugin/marketplace.json
 ```
@@ -124,7 +129,40 @@ mantiene igual para que funcione en ambos motores.
    muestra los symlinks `ld-*`; en Claude y en opencode `/ld` los autocompleta
 5. Actualizá Engram MCP si el ambiente no lo tiene (ver "Engram" abajo)
 
-`setup.sh` es idempotente: se puede correr de nuevo sin romper nada.
+`setup.sh` es idempotente: se puede correr de nuevo sin romper nada. Acepta
+`HARNESS=/otra/ruta` si clonaste el repo en otro lado.
+
+## Configuración (`~/.config/ld-harness/`)
+
+El harness separa **mecanismo** (el repo) de **valores** (tu máquina). El setup crea
+`~/.config/ld-harness/config.env` desde `config.example.env` la primera vez y nunca lo
+vuelve a tocar.
+
+```txt
+~/.config/ld-harness/
+├── config.env      tus valores: idiomas, registro
+└── adapters/       entornos que sirven a varios repos (droplet-*)
+```
+
+Precedencia: **default del código < `config.env` < `<repo>/.ld-harness.env`**. El archivo
+del proyecto es opcional y solo lleva lo que difiere; conviene commitearlo, porque describe
+el proyecto y no la máquina.
+
+| clave                | valores                           | qué controla                                      |
+| -------------------- | --------------------------------- | ------------------------------------------------- |
+| `LD_PROSA_CHAT`      | `es-AR` · `es` · `en`             | idioma de la conversación. `es-AR` implica voseo  |
+| `LD_PROSA_ARTIFACTS` | `en` · `es`                       | idioma de PRs, tickets, docs y mensajes de commit |
+| `LD_PROSA_REGISTER`  | `informal` · `neutral` · `formal` | trato cuando el locale no lo implica              |
+
+El **código no se configura**: identificadores y comentarios van siempre en inglés. Es la
+única superficie con un valor único, y por eso no tiene clave.
+
+Ejemplo de override por proyecto, en `academika/.ld-harness.env`:
+
+```txt
+# Los artefactos de este repo van en castellano.
+LD_PROSA_ARTIFACTS=es
+```
 
 ## Engram (memoria del harness)
 

@@ -229,35 +229,12 @@ cambia lo que el agente hace, no entra.
 | P5  | `ld-gate`: texto vs ejecución   | patrones de prosa no bloquean gh/git     | 31/10 |
 | P6  | Config de usuario               | `config.env` de tres niveles + setup     | 01/11 |
 
-**Listo para escribir, sin dependencias**
+**Pendiente → issues.** El backlog vive en el milestone
+[`agent-system`](https://github.com/laendoor/ld-harness/milestone/1): un issue por ítem, con
+el id en el título (`P7`, `E1`, `C3`…). Acá no se mantiene una segunda copia.
 
-| id  | qué             | produce                                            |
-| --- | --------------- | -------------------------------------------------- |
-| P7  | `ld-prosa` v0.5 | núcleo de ~100 líneas + referencias es/en/posturas |
-
-**Definición pendiente**
-
-| id  | qué                                | produce                                    | depende de |
-| --- | ---------------------------------- | ------------------------------------------ | ---------- |
-| E1  | Auditoría de duplicación de hechos | dónde se dice lo mismo N veces             | —          |
-| E2  | Fuente canónica por tipo de hecho  | regla + punteros de una línea              | E1         |
-| E3  | Mapa de lectura por repo           | archivo + check de paths                   | E2         |
-| E4  | Formato de commit con el porqué    | en uso en esta rama; falta formalizar      | D3         |
-| B2  | Catálogo de playbooks              | auditar 6 existentes, no diseñar 7         | B1, A2     |
-| B3  | Matriz de cobertura de skills      | paso → skill existente / crear / borrar    | B2         |
-| C3  | Spec de `ld-self-eval`             | preguntas, scoring, registro del veredicto | —          |
-| C4  | Implementación de `ld-self-eval`   | skill + command                            | C3, B2     |
-| A3  | Spec del router                    | batería + política + fallback              | B2         |
-| C1  | Jev vs clasificador in-context     | comparación medida                         | A3         |
-| C2  | Prototipo medido                   | acierto sobre 30 tareas reales             | C1         |
-
-**Diferido con motivo**
-
-| id  | qué                             | por qué espera                                                                |
-| --- | ------------------------------- | ----------------------------------------------------------------------------- |
-| D9  | Adapters → perfiles de proyecto | toca 3+ repos y `ld-workflow` §9; §9 corre desde `main` en las otras sesiones |
-| P8  | Formato del perfil              | solo hace falta cuando arranque D9                                            |
-| F   | Implementación por slices       | todo lo anterior                                                              |
+Esta rama cierra en **P7 + E4**; el resto se ataca post-merge. Los ítems diferidos (D9, P8,
+F) no tienen issue todavía: se abren cuando alguien decida arrancarlos.
 
 ## No objetivos
 
@@ -269,10 +246,10 @@ cambia lo que el agente hace, no entra.
 
 ## Preguntas abiertas
 
-1. ¿B1 tiene muestra suficiente en engram, o hay que capturar dos semanas antes?
-2. ¿La confianza 1..5 se usa como probabilidad o solo como "sé / creo / adivino"?
-3. ¿El disparo del PR es `ld-ship-task` o `ld-start-task`?
-4. **Colisión de nombres:** el README ya llama "adapter" a los comandos por proyecto
-   (`aika-*`, `fini-*`, `gr-*`). Los de entorno (`droplet-12-cactus.md`) son otra cosa con
-   el mismo nombre. Opciones: renombrar estos a _environment profile_ en
-   `entornos/`, o dejar "adapter" para los dos y distinguir por contexto.
+Cerradas por distribución:
+
+1. **Muestra de B1:** cerrada. El inventario usó 1183 prompts de 5 proyectos y alcanzó para
+   las tres lecturas.
+2. **Confianza 1..5:** se define en C3, junto con el resto del spec.
+3. **Disparo del PR:** `ld-ship-task`, según D4.
+4. **Colisión de nombres "adapter":** se resuelve al ejecutar D9.

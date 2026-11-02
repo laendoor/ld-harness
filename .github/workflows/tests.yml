@@ -1,0 +1,24 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plugins:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: prettier
+        run: npm i -g prettier@3
+      - name: ld-gate
+        run: bash plugins/ld-gate/test.sh
+      - name: ld-format
+        run: bash plugins/ld-format/test.sh
+      - name: shellcheck
+        run: shellcheck -S warning setup.sh plugins/*/hooks/*.sh plugins/*/*.sh

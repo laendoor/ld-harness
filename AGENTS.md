@@ -20,7 +20,7 @@ no hay excepciones implícitas.
 3. Al cerrar, tick del issue con una línea de qué quedó. El detalle está en el commit.
 
 El plan y las decisiones de cada ítem viven en su issue, no en un doc de rama.
-`AGENT-SYSTEM.md` es un documento de trabajo que **muere al mergear**.
+El diseño y su evidencia viven en [`docs/agent-system.md`](docs/agent-system.md).
 
 ## Commits
 

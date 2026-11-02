@@ -1,9 +1,11 @@
-# Sistema de agentes — diseño en curso
+# Sistema de agentes — diseño
 
-Documento de trabajo de la rama `feat/agent-system`. **Muere al mergear**: lo que
-sobreviva pasa al body del PR y a los archivos que correspondan. No se mantiene.
+Registro durable del diseño: decisiones, la evidencia que las justifica (B1) y el contrato
+de playbook (A2). El backlog vive en el milestone
+[`agent-system`](https://github.com/laendoor/ld-harness/milestone/1), no acá.
 
-Fase: definición. Nada de lo de abajo está implementado salvo lo que dice `hecho`.
+Estado: la infraestructura base y los tres playbooks (`ld-ops`, `ld-db`, `ld-research`)
+están implementados. D1–D9 siguen vigentes, con lo que cada una marque como diferido.
 
 ## Decisiones
 
@@ -233,8 +235,9 @@ cambia lo que el agente hace, no entra.
 [`agent-system`](https://github.com/laendoor/ld-harness/milestone/1): un issue por ítem, con
 el id en el título (`P7`, `E1`, `C3`…). Acá no se mantiene una segunda copia.
 
-Esta rama cierra en **P7 + E4**; el resto se ataca post-merge. Los ítems diferidos (D9, P8,
-F) no tienen issue todavía: se abren cuando alguien decida arrancarlos.
+Orden acordado: mergear esta rama con la infraestructura, después CI (#13), P7 y el resto.
+Los ítems diferidos (D9, P8, F) no tienen issue todavía: se abren cuando alguien decida
+arrancarlos.
 
 ## No objetivos
 

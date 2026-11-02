@@ -14,6 +14,8 @@ grep -Eq '(^|[;&|(`[:space:]])git([[:space:]]+-{1,2}[^[:space:]]+([[:space:]]+[^
 repo="$(grep -Eo 'git[[:space:]]+-C[[:space:]]+[^[:space:]]+' <<<"$cmd" | head -1 | awk '{print $3}' | tr -d "'\"" || true)"
 # Without -C, a leading `cd <path> && git commit` moves the commit to that checkout: judge it, not the cwd.
 [ -n "$repo" ] || repo="$(grep -Eo '(^|[;&|(])[[:space:]]*cd[[:space:]]+[^[:space:];&|)]+' <<<"$cmd" | head -1 | awk '{print $NF}' | tr -d "'\"" || true)"
+# The quoted "~" below is matched on purpose: it is a literal, not a path to expand.
+# shellcheck disable=SC2088
 case "$repo" in "~"|"~/"*) repo="$HOME${repo#\~}" ;; esac
 case "$repo" in "") repo="${cwd:-.}" ;; /*) ;; *) repo="${cwd:-.}/$repo" ;; esac
 branch="$(git -C "$repo" symbolic-ref --short -q HEAD || echo DETACHED)"

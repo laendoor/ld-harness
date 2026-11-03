@@ -20,5 +20,7 @@ jobs:
         run: bash plugins/ld-gate/test.sh
       - name: ld-format
         run: bash plugins/ld-format/test.sh
+      - name: ld-prosa
+        run: bash plugins/ld-prosa/test.sh
       - name: shellcheck
         run: shellcheck -S warning setup.sh plugins/*/hooks/*.sh plugins/*/*.sh

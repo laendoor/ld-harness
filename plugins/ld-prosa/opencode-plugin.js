@@ -14,31 +14,8 @@
 
 // Nota: sin import de "@opencode/plugin" (ver ld-gate). El schema v2 solo
 // pide { id, setup }. Los builtins de node sí resuelven siempre.
-import fs from "node:fs"
-import os from "node:os"
-import path from "node:path"
-
-const DEFAULTS = {
-	LD_PROSA_CHAT: "es-AR",
-	LD_PROSA_ARTIFACTS: "en",
-	LD_PROSA_REGISTER: "informal",
-}
-
-function merge(file, out) {
-	try {
-		for (const line of fs.readFileSync(file, "utf8").split("\n")) {
-			const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/)
-			if (m && m[2] !== "") out[m[1]] = m[2]
-		}
-	} catch {}
-}
-
-function loadConfig() {
-	const out = { ...DEFAULTS }
-	merge(path.join(os.homedir(), ".config", "ld-harness", "config.env"), out)
-	merge(path.join(process.cwd(), ".ld-harness.env"), out)
-	return out
-}
+// El parser de config es el mismo que usan los hooks de Claude: hooks/config.js.
+import { loadConfig } from "./hooks/config.js"
 
 const LANG_NAME = { en: "inglés", es: "español", "es-AR": "español rioplatense" }
 
@@ -58,7 +35,8 @@ function configLine(c) {
 const RULES =
 	"Default precise/terse — cut data and ceremony, never the " +
 	"reasoning (rules carry their why); compression removes ideas, never " +
-	"grammar. Rebuild intuition with one concrete example first whenever " +
+	"grammar. Name who does what: if the reader must rebuild the agent, " +
+	"decompress. Rebuild intuition with one concrete example first whenever " +
 	"the reader re-enters context, not only when a term is new. Reasoning " +
 	"in whole sentences, topology in a diagram. Close on the consequence. " +
 	"Flag unverified claims and decision reversals explicitly. Inside a " +

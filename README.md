@@ -61,7 +61,8 @@ ld-harness/
 │   ├── ld-research/        ← responder con evidencia: repo, historia git o web
 │   └── ld-review-fix/ ld-whats-next/
 ├── plugins/
-│   ├── ld-prosa/           ← estilo de comunicación (always-on)
+│   ├── ld-prosa/           ← estilo de comunicación, always-on: núcleo + referencias
+│   │                         (`bash plugins/ld-prosa/test.sh`)
 │   ├── ld-gate/            ← enforcement determinístico: sin push, sin commit en main,
 │   │                         sin patrones catastróficos (`bash plugins/ld-gate/test.sh`)
 │   └── ld-format/          ← formateo estándar .md (Prettier + MD040); no toca
@@ -156,6 +157,12 @@ el proyecto y no la máquina.
 
 El **código no se configura**: identificadores y comentarios van siempre en inglés. Es la
 única superficie con un valor único, y por eso no tiene clave.
+
+`ld-prosa` es un núcleo corto más tres referencias: `posturas.md` (las posturas completas,
+se lee on demand) y `es.md` / `en.md` (los síntomas y los falsos positivos de cada idioma).
+En Claude, el hook de sesión inyecta el núcleo y la referencia del idioma de la conversación
+y de los artefactos. En opencode no hay hook de sesión: el plugin inyecta el nudge por turno
+y el skill se abre cuando la descripción matchea.
 
 Ejemplo de override por proyecto, en `academika/.ld-harness.env`:
 

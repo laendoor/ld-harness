@@ -11,8 +11,8 @@ usually shows three at once.
 
 ## Six ways English hides the agent
 
-The paper (arXiv 2610.29162) measures these as processing costs that frontier
-models overuse. Each pair keeps the meaning and restores the agent.
+The paper (arXiv 2610.29162) measures most of these as processing costs that
+frontier models overuse. Each pair keeps the meaning and restores the agent.
 
 1. **Inanimate subject with an animate verb.** "The config decides which plugin
    loads" → "The loader reads the config to choose the plugin." Personification

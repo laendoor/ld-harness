@@ -20,6 +20,7 @@ refs=$(run references)
 grep -q "Name who does what" <<<"$core" || fail "core missing from the injection"
 grep -q "postures in full" <<<"$core" && fail "core carries posturas"
 grep -q "Prosa en español" <<<"$core" && fail "core carries a language reference"
+grep -q "skill files in $R" <<<"$core" || fail "core does not name the skill dir"
 grep -q "Prosa en español" <<<"$refs" || fail "es reference missing on es-AR chat"
 grep -q "English prose" <<<"$refs" || fail "en reference missing on en artifacts"
 grep -q "postures in full" <<<"$refs" && fail "posturas.md injected; it is on demand"
@@ -36,6 +37,12 @@ refs=$(run references)
 grep -q "English prose" <<<"$refs" || fail "en reference missing with en/en"
 grep -q "Prosa en español" <<<"$refs" && fail "es reference leaked with en/en"
 
+# Quotes are dotenv syntax, not part of the value.
+printf 'LD_PROSA_CHAT="en"\nLD_PROSA_ARTIFACTS="en"\n' >"$T/home/.config/ld-harness/config.env"
+refs=$(run references)
+grep -q "English prose" <<<"$refs" || fail "quoted value dropped the en reference"
+grep -q "Prosa en español" <<<"$refs" && fail "quoted value leaked es"
+
 # Project file beats the user file.
 printf 'LD_PROSA_CHAT=es\nLD_PROSA_ARTIFACTS=es\n' >"$T/proj/.ld-harness.env"
 refs=$(run references)
@@ -51,9 +58,10 @@ for ref in $(grep -o 'references/[a-z]*\.md' "$R/SKILL.md" | sort -u); do
 	[ -f "$R/$ref" ] || fail "missing $ref named in the core"
 done
 
-# The per-turn nudge carries the rule on both engines (they are kept in sync by hand).
-grep -q "Name who does what" "$H/ld-prosa-reminder.js" || fail "claude nudge lost the rule"
-grep -q "Name who does what" "$P/opencode-plugin.js" || fail "opencode nudge lost the rule"
+# The per-turn nudge lives once and both engines read it from there.
+grep -q "Name who does what" "$H/nudge.js" || fail "nudge lost the rule"
+grep -q "require('./nudge')" "$H/ld-prosa-reminder.js" || fail "claude nudge bypasses nudge.js"
+grep -q 'from "./hooks/nudge.js"' "$P/opencode-plugin.js" || fail "opencode nudge bypasses nudge.js"
 
 if [ "$fails" -eq 0 ]; then
 	echo "ld-prosa: all checks pass"

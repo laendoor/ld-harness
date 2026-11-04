@@ -9,14 +9,15 @@
 // default config the two together cross it. posturas.md stays out on purpose:
 // the core names it, and it is read when a posture trigger fires.
 //
-// Usage: ld-prosa-activate.js [core|references] — no argument prints both.
+// Usage: ld-prosa-activate.js [core|references] — anything but "references"
+// prints core, so no invocation can cross the cap.
 
 const fs = require('fs');
 const path = require('path');
 const { loadConfig, language } = require('./config');
 
 const root = path.join(__dirname, '..', 'skills', 'ld-prosa');
-const part = process.argv[2] || 'all';
+const part = process.argv[2] === 'references' ? 'references' : 'core';
 
 function read(file) {
   try {
@@ -28,15 +29,13 @@ function read(file) {
 }
 
 const core = read('SKILL.md');
-if (!core) {
-  process.stdout.write('OK');
-  process.exit(0);
-}
 
 const chunks = [];
-if (part !== 'references') chunks.push('LD-PROSA ACTIVE\n\n' + core);
+if (part === 'core' && core) {
+  chunks.push('LD-PROSA ACTIVE — skill files in ' + root + '\n\n' + core);
+}
 
-if (part !== 'core') {
+if (part === 'references') {
   const config = loadConfig();
   const langs = [
     ...new Set([language(config.LD_PROSA_CHAT), language(config.LD_PROSA_ARTIFACTS)]),

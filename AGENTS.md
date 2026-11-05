@@ -24,15 +24,8 @@ El diseño y su evidencia viven en [`docs/agent-system.md`](docs/agent-system.md
 
 ## Commits
 
-El canon de una decisión es el **cuerpo del commit** (D3), no un ADR.
-
-- Subject: `tipo(área): qué`, en inglés, imperativo, ≤72.
-- Body: **what** cambió, **why** (el problema real, con números si los hay) y **qué se
-  descartó** y por qué. Si no hubo alternativa, decilo.
-- El porqué va en el body porque el diff ya dice el qué.
-
-**Gotcha del gate:** los patrones de prosa no se eximen en comandos multilínea. Para un body
-largo usá `git commit -F archivo`; nunca `-m` con `;`, `&`, `|`, backticks o `$(`.
+El canon de una decisión es el **cuerpo del commit** (D3), no un ADR. El formato del
+subject y del cuerpo vive en [`skills/ld-workflow/SKILL.md`](skills/ld-workflow/SKILL.md) §1.
 
 ## Antes de commitear
 

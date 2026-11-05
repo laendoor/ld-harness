@@ -133,6 +133,10 @@ el ticket (slot `ticket.fetch`), en las dos direcciones:
   como la autoridad.
 - Scope que el ticket no describe → 🟡: el ticket necesita actualizarse, no el código.
 
+**Mensajes de commit.** Son la decisión registrada (D3): cada commit del branch, salvo
+merges y `fixup!`, cumple en su cuerpo el formato de
+`~/dev/ld-harness/skills/ld-workflow/SKILL.md` §1. Uno que no lo cumpla → 🟡 con su sha.
+
 Ticket sin criterios, o tarea sin ticket: decirlo en una línea y seguir.
 
 ## 5. Pasada de juicio (agente personal)

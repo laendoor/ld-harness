@@ -25,6 +25,23 @@ bitácora es práctica local de `proyecto-finisterre` (hay informe y defensa), n
 replica acá. `ld-adr` queda para decisiones que cruzan repos o que hay que defender
 académicamente; los adapters (`aika-adr`, `fini-adr`) pueden endurecer esa regla.
 
+Ejemplo, un commit real de este repo (`7dbb6b6`):
+
+```txt
+fix(gate): exempt text writers from prose-matching patterns
+
+Issue bodies and commit messages name destructive commands — documenting a
+rollback, reverting one. The patterns matched the mention and blocked the whole
+command, which cost an extra round trip while filing the deploy issues.
+[...]
+Discarded: exempting only gh. The message for this very fix names a schema
+rollback and would have blocked itself, same class one line away.
+```
+
+El subject dice qué; el primer párrafo, el problema que existía antes; el `Discarded`,
+la alternativa que se dejó. El diff ya dice el qué, así que un cuerpo que lo repita no
+registró nada.
+
 **D4 · Cierre = `ld-self-eval`.** Walkthrough corto + evaluación de comprensión antes de
 aprobar. Opuesto complementario de `ld-self-review`: esa pregunta _¿está bien el código?_,
 esta pregunta _¿entendiste lo que aprobás?_. Cantidad de preguntas proporcional al scope.

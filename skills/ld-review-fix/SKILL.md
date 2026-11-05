@@ -61,6 +61,10 @@ Cuando todos los fixes estén aplicados, stagear los archivos modificados y suge
 
 ```txt
 fix(review): address PR #{number} comments
+
+<what changed, and which review comment asked for it>
+
+Discarded: <the alternative left out, or "none — the comment named the fix">
 ```
 
 ### 6. Push (lo hace el usuario)

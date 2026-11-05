@@ -123,8 +123,8 @@ Frenar acá. Sin OK sobre el plan no se escribe código.
 
 ## 4. Ship
 
-1. Commit convencional, en inglés: uno solo, o uno por ecosistema si el diff es
-   grande.
+1. Commit convencional según `ld-workflow` §1 (cuerpo con qué, por qué y qué se
+   descartó): uno solo, o uno por ecosistema si el diff es grande.
 2. **Frenar para tu review del diff** (difit si lo pedís).
 3. **El push es tuyo.** Mostrar `git push -u origin <branch>` y frenar.
 4. **PR** con `ld-create-pr`. El body cierra los PRs absorbidos **con el keyword

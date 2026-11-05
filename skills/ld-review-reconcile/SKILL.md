@@ -25,7 +25,7 @@ lentes). Siempre suma:
   faltantes no: son de ponytail;
 - cada 🔴 y 🟡 necesita un caso concreto: esta entrada o situación da este
   resultado incorrecto. Sin caso no hay finding;
-- devolver cada finding con `file:line`, claim, severidad, `confidence`, categoría
+- devolver cada finding con `file:line` o el `<sha>` del commit, claim, severidad, `confidence`, categoría
   (`contract`, `rule`, `bug`, `security`, `doc`) y, para 🔴 y 🟡, qué pasa, caso,
   fix con su costo concreto y qué se acepta si se deja.
 
@@ -54,9 +54,11 @@ re-puntúa.
    Caso de quien lo tenga. Mismo lugar con problemas distintos → dos findings.
 3. **Quote-check sobre la lista unida** — un solo lector contra el mismo texto, por
    eso corre acá y no en cada agente. El `file:line` existe en HEAD (en el worktree,
-   si es un PR); si no, descartar (`cite-not-found`). Las 5–10 líneas alrededor
-   contienen lo que el claim nombra; si no, descartar (`claim-not-supported`). Una
-   cita fuera del diff vale — ponytail lee callers — y se marca `fuera del diff`.
+   si es un PR); un `<sha>` vale como cita y se verifica con `git show`. Si no
+   resuelve, descartar (`cite-not-found`). Las 5–10 líneas alrededor del `file:line`
+   contienen lo que el claim nombra — en un commit, su cuerpo; si no, descartar
+   (`claim-not-supported`). Una cita fuera del diff vale — ponytail lee callers — y se
+   marca `fuera del diff`.
 4. **Intención.** El `What this change does:` de ponytail contra el Goal del plan, o
    contra el resumen y los criterios del ticket. Coincide → una línea con su frase.
    Difiere, o hay duda → el bloque Intención con las dos frases textuales y la
@@ -102,7 +104,7 @@ self-review, la tabla de destinos en code-review-pr), y los findings.
 ````markdown
 ### N. 🔴 <el claim en una línea> · <ambos | personal | ponytail (categoría)>
 
-`file:line` <· fuera del diff>
+`file:line` o `<sha>` <· fuera del diff>
 
 ```ts
 <el hunk más chico que lo prueba>

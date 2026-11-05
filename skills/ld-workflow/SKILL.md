@@ -56,15 +56,18 @@ adapter: lo que cada proyecto aporta y los defaults cuando no hay adapter.
 - **Numeración:** decisiones, findings y fases se numeran y nunca se renumeran
   dentro de la tarea. Respondés por número; una que se cae "deja de existir", no
   corre a las demás.
-- **Commits:** convencionales, en inglés (default; `LD_PROSA_ARTIFACTS` manda): `tipo(área): qué`,
-  imperativo, ≤72 en el subject. El cuerpo registra la decisión (D3): **what** cambió, **why** (el problema
+- **Commits:** convencionales: el tipo (`feat`, `fix`, …) no se traduce; el texto va en inglés
+  por default y `LD_PROSA_ARTIFACTS` lo cambia: `tipo(área): qué`, imperativo, ≤72 en el subject.
+  El cuerpo registra la decisión (D3): **what** cambió, **why** (el problema
   real, con números si los hay) y **qué se descartó** y por qué; sin alternativa, decilo. Lo controla la review,
   no el gate. Nunca en `main`/`master`, nunca push: ld-gate los bloquea.
   ld-gate lee el comando como texto: juzga el repo de `git -C <path>`, si no el de un `cd <path>` inicial, si no
   el cwd. Cuando el repo de la tarea no es el cwd, el path va literal (un `$VAR` llega sin expandir → DETACHED →
   deny). Matchea `git … commit|merge|cherry-pick|revert|am` en cualquier parte del texto, heredocs incluidos: una
-  edición scripteada que los nombra va en un archivo, y un cuerpo que nombre un comando de la lista se escribe
-  con `git commit -F archivo`. Crear el branch y commitear van en llamadas separadas,
+  edición scripteada que los nombra va en un archivo. Un cuerpo que nombre un patrón de prosa
+  (`dropdb`, `alembic downgrade`, `drop table`, `docker volume rm`) va con `git commit -F archivo`:
+  un heredoc es multilínea y no se exime, y nunca `-m` con `;`, `&`, `|`, backticks o `$(`.
+  Crear el branch y commitear van en llamadas separadas,
   porque el hook evalúa antes de que corra el `git switch -c`.
 
 Formato del plan:

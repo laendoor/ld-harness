@@ -6,13 +6,12 @@ Title:  feat(scope): imperative summary (TICKET-KEY)
 This is the template for feature and task work. For a bug fix use ?template=bug.md,
 for docs/deps/renames use ?template=chore.md.
 
-This is ld-create-pr's fallback copy, used when the repo has no .github templates of its own.
-
 Drop any section that has nothing real to say. An empty section is worse than no section.
 Write in the imperative — "normalize the score", not "this PR normalizes the score".
 -->
 
 <!-- One or two sentences: what this changes and why it needed changing. Keep the ticket link on this line. -->
+
 [TICKET-KEY](<ticket url>)
 
 Net: **+X / −Y** across N files

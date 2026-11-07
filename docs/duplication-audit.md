@@ -35,7 +35,26 @@ Risk: **high** when the copies disagree in a way that changes behavior, or the r
 
 ## Summary
 
-Pending: counts per type and the high-risk list are filled in phase 2.
+| fact type                        | findings | high  | medium | low   |
+| -------------------------------- | -------- | ----- | ------ | ----- |
+| Mechanism, path or constant      | 21       | 7     | 12     | 2     |
+| Decision and rationale           | 6        | 2     | 4      | 0     |
+| Rule the agent must always apply | 3        | 0     | 2      | 1     |
+| Procedure                        | 7        | 0     | 6      | 1     |
+| Foundation, evidence, diagram    | 0        | 0     | 0      | 0     |
+| **Total**                        | **37**   | **9** | **24** | **4** |
+
+**High-risk findings**
+
+1. **#1** — pre-commit checks diverge: AGENTS runs two suites, CI runs three plus shellcheck.
+2. **#2** — the gate trio is repeated in four surfaces and the rule is gate-enforced.
+3. **#3** — the workflow skill describes the hook's matching; a hook change makes the skill wrong.
+4. **#4** — the catastrophic pattern list lives in two engines with no shared source.
+5. **#5** — "who runs the checks" has two policies.
+6. **#6** — the Académika workflow adapters point at one checkout, the ops adapter at another.
+7. **#10** — D6 and D9 put cross-project adapters in different directories.
+8. **#22** — merge policy in seven surfaces; irreversible.
+9. **#23** — push policy in nine surfaces; gate-enforced.
 
 ## 1. Mechanism, path or constant
 
@@ -275,3 +294,12 @@ No finding: B1 and A2 live only in `docs/agent-system.md:148-232`; no second cop
 
 - The start decision on #3 (2026-11-06) says the harness does not delete adapters. That is a decision, not a file copy; it is recorded here because it makes D9's deletion half stale.
 - `aika-*` and `fini-*` are outside this repo; their copies are cited with `~` paths and will not appear in a repo diff.
+
+## Verification
+
+Checked at the audited commit:
+
+- **Citations resolve.** A script extracted 136 `path:line` citations across 51 files; every file exists and every line is within the file. One bad citation from the first pass (line 60 of the default PR template, whose file has 45 lines) was corrected.
+- **Every `diverge` row was re-read against its sources.** Nine rows: #1, #5, #6, #10, #15, #19, #25, #27, #35. Each difference was confirmed in the cited files, not inferred from names.
+- **Sources read.** The repo roots in Scope, the 19 adapter files and the global config. Sources with no finding contributed no duplicate fact: `skills/ld-whats-next/SKILL.md`, `skills/ld-mem/SKILL.md`, the `fini-bitacora` / `fini-latex` / `fini-reunion` / `fini-plan-fase` procedures and `droplet-12-cactus.md`.
+- **Suites.** `bash plugins/ld-gate/test.sh`, `bash plugins/ld-format/test.sh` and `bash plugins/ld-prosa/test.sh` pass.
